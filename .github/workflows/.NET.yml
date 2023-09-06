@@ -1,0 +1,50 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "master" , "*_validate"]
+    paths-ignore: [ "*.md" , "Documentation"  ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  # run builds in parallel target windows, mac and linux
+  build:
+      runs-on: ${{ matrix.os }}
+      strategy:
+        matrix:
+          os: [windows-latest, macos-latest, ubuntu-latest]
+          dotnet: [ '6.0.x' , '7.0.x']
+          buildConfiguration: [ 'Debug' , 'Release']
+      name: Build on ${{ matrix.os }} with .NET ${{ matrix.dotnet }}
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup .NET 7.0 SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet }}
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore --configuration ${{ matrix.buildConfiguration }}
+      - name: Pack
+        run: dotnet pack --no-build --configuration ${{ matrix.buildConfiguration }}
+      - name: Test
+        run: dotnet test --no-build --verbosity normal --configuration ${{ matrix.buildConfiguration }} /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include="[coverlet.collector]*%2c[coverlet.core]*%2c[coverlet.msbuild.tasks]*" /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.xunit.extensions]*"
+
+      - uses: ./.github/workflows/publish-coverlet-result-files.yml
+
+      - uses: ./.github/workflows/publish-coverage-results.yml
+        with:
+          reports: ${{ github.workspace }}/**/coverage.opencover.xml
+          condition: and(succeeded(), eq(variables['_BuildConfig'], 'Debug'))
+          assemblyfilters: '-xunit*;+Coverlet.Core.*;+Coverlet.Collector.*'

@@ -1,0 +1,38 @@
+name: "Publish coverlet results"
+description: "Publish coverlet results to github actions"
+
+runs:
+  using: "composite"
+  steps:
+    - name: checkout repository
+      uses: actions/checkout@v4
+
+    - name: Prepare coverage files to Upload
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory "$($GITHUB_WORKSPACE)/artifacts/TestLogs/"
+        function Copy-FileKeepPath {
+        param (
+            $Filter,$FileToCopy,$Destination,$StartIndex
+            )
+        Get-ChildItem -Path $FileToCopy -Filter $Filter -Recurse -File | ForEach-Object {
+            $fileName = $_.FullName
+            $newDestination=Join-Path -Path $Destination -ChildPath $fileName.Substring($StartIndex)
+            $folder=Split-Path -Path $newDestination -Parent
+            if (!(Test-Path -Path $folder)) {New-Item $folder -Type Directory -Force -Verbose}
+            Copy-Item -Path $fileName -Destination $newDestination -Recurse -Force -Verbose
+            }
+        }
+        $logfiles = "coverage.opencover.xml", "coverage.cobertura.xml", "coverage.json", "log.txt", "log.datacollector.*.txt", "log.host.*.txt"
+        foreach ($logfile in $logfiles ) {
+        Copy-FileKeepPath -FileToCopy "$($GITHUB_WORKSPACE)/test/*" -des "$($GITHUB_WORKSPACE)/artifacts/TestLogs/" -filter $logfile -startIndex "$($GITHUB_WORKSPACE)/test/coverlet.integration.tests/bin/".Length
+        }
+      always: true
+
+    - name:  Publish coverlet logs
+      always: true
+      uses: actions/upload-artifact@v3
+      with:
+       name: TestLogs_${{ matrix.os }})_${{ matrix.buildConfiguration }}
+       path: ${{ github.workspace }}/artifacts/TestLogs
+
