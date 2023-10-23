@@ -307,3 +307,6 @@ test/coverlet.integration.determisticbuild/runsettings
 
 coverage.cobertura.xml
 coverage.opencover.xml
+
+DefaultVersions.Generated.props
+reports/

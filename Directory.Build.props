@@ -17,6 +17,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RestoreSources>
       https://api.nuget.org/v3/index.json;
+      $(RepoRoot)bin\Debug\Packages
     </RestoreSources>
   </PropertyGroup>
 
