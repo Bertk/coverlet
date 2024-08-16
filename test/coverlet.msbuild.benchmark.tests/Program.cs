@@ -6,14 +6,12 @@ using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Toolchains.InProcess.NoEmit;
 
-namespace coverlet.core.benchmark.tests
+namespace coverlet.msbuild.benchmark.tests
 {
   public class Program
   {
-
     public static void Main(string[] args)
     {
-
       var config = DefaultConfig.Instance
              .WithOptions(ConfigOptions.JoinSummary)
              .AddJob(Job
@@ -21,8 +19,8 @@ namespace coverlet.core.benchmark.tests
                .WithLaunchCount(1)
                .WithToolchain(InProcessNoEmitToolchain.Instance));
       var summary = BenchmarkRunner.Run(new[]{
-            BenchmarkConverter.TypeToBenchmarks( typeof(CoverageBenchmarks), config),
-            BenchmarkConverter.TypeToBenchmarks( typeof(InstrumenterBenchmarks), config)
+            BenchmarkConverter.TypeToBenchmarks( typeof(CoverageResultTaskBenchmarks), config),
+            //BenchmarkConverter.TypeToBenchmarks( typeof(InstrumentationTaskBenchmarks), config)
             });
 
       // Use this to select benchmarks from the console:
