@@ -10,7 +10,7 @@
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="8.0.0"/>
     <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="8.0.0"/>
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" VersionOverride="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="8.0.1"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" VersionOverride="8.0.0"/>
     <PackageReference Include="Mono.Cecil" />
     <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="System.Text.Json" VersionOverride="8.0.4"/>
