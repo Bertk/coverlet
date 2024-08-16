@@ -316,3 +316,4 @@ coverage.*.opencover.xml
 
 FolderProfile.pubxml
 BenchmarkDotNet.Artifacts/
+/NuGet.config
