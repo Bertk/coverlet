@@ -25,7 +25,7 @@ namespace Coverlet.Core.Helpers
     private readonly ISourceRootTranslator _sourceRootTranslator;
     private ILogger _logger;
     private static readonly RegexOptions s_regexOptions =
-      RegexOptions.Multiline | RegexOptions.Compiled | RegexOptions.IgnoreCase;
+      RegexOptions.Multiline | RegexOptions.Compiled;
 
     public InstrumentationHelper(IProcessExitHandler processExitHandler, IRetryHelper retryHelper, IFileSystem fileSystem, ILogger logger, ISourceRootTranslator sourceRootTranslator)
     {
