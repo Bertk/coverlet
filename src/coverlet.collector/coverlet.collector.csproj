@@ -38,7 +38,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" VersionOverride="17.8.0"/>
     <PackageReference Include="NuGet.Frameworks" />
   </ItemGroup>
 
