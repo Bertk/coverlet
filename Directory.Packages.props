@@ -33,6 +33,8 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftNETTestSdkVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Platform" Version="1.7.0" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.7.0" />
     <PackageVersion Include="NuGet.Frameworks" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
