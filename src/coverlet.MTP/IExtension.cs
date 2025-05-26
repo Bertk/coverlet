@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.ComponentModel.DataAnnotations;
+using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 
 namespace coverlet.MTP.Extension
@@ -29,4 +31,15 @@ namespace coverlet.MTP.Extension
     //Task OnCoverageDataCollectedAsync(CoverageData data);
   }
 
+  public interface ICommandLineOptionsProvider : IExtension
+  {
+    IReadOnlyCollection<CommandLineOption> GetCommandLineOptions();
+
+    Task<ValidationResult> ValidateOptionArgumentsAsync(
+        CommandLineOption commandOption,
+        string[] arguments);
+
+    Task<ValidationResult> ValidateCommandLineOptionsAsync(
+        ICommandLineOptions commandLineOptions);
+  }
 }
