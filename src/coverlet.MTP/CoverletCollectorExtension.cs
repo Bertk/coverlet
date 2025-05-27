@@ -196,14 +196,4 @@ namespace coverlet.MTP
       throw new NotImplementedException();
     }
   }
-  internal class CoverletMTPConfiguration
-  {
-    public string[] IncludePatterns { get; set; } = Array.Empty<string>();
-    public string[] ExcludePatterns { get; set; } = Array.Empty<string>();
-    public bool IncludeTestAssembly { get; set; }
-    public string OutputDirectory { get; set; } = string.Empty;
-    public string sourceMappingFile { get; set; } = string.Empty;
-    public bool EnableSourceMapping { get; set; }
-    public string[] formats { get; set; } = ["json"];
-  }
 }

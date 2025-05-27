@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 //using coverlet.MTP.Extension;
-using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
 
@@ -25,7 +24,7 @@ namespace coverlet.MTP
     public bool IsHidden { get; }
   }
 
-  public class CommandLineOptionsProvider : ICommandLineOptionsProvider
+  public class CommandLineOptionsProvider
   {
     private readonly List<CommandLineOption> _commandLineOptions = new()
       {
@@ -74,7 +73,7 @@ namespace coverlet.MTP
         {
           return Task.FromResult(ValidationResult.Invalid($"Only one value is allowed for '{commandOption.Name}'."));
         }
-        if (!arguments[0].Contains("MissingAll") && !arguments[0].Contains("MissingAny") && !arguments[0].Contains("MissingNone"))
+        if (!arguments[0].Contains("MissingAll") && !arguments[0].Contains("MissingAny") && !arguments[0].Contains("None"))
         {
           return Task.FromResult(ValidationResult.Invalid($"The value '{arguments[0]}' is not a valid option for '{commandOption.Name}'."));
         }
