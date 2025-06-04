@@ -180,6 +180,8 @@ jobs:
           ${{ github.workspace }}/artifacts/reports/**/*.cobertura.xml
           ${{ github.workspace }}/test/**/*.cobertura.xml
         coverage-threshold: 80
+        show-failed-tests-only: true
+        show-test-output: true
 
     # - name: Upload coverage report artifact
     #   if: success() && matrix.os  == 'windows-latest'
