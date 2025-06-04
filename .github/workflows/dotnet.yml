@@ -52,16 +52,16 @@ jobs:
         dotnet pack -c $BuildConfiguration
         dotnet pack -c release
 
-    # - name: Archive production artifacts
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: dist-bin-and-packages
-    #     path: |
-    #       artifacts/bin
-    #       artifacts/package
-    #       artifacts/publish
-    #       artifacts/log
-    #       *.binlog
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-bin-and-packages
+        path: |
+          artifacts/bin
+          artifacts/package
+          artifacts/publish
+          artifacts/log
+          *.binlog
 
   # Fail if there are any failed tests
   #
@@ -96,10 +96,10 @@ jobs:
           with:
             dotnet-version: '8.0.x'
 
-        # - name: Download packages and artifacts
-        #   uses: actions/download-artifact@v4
-        #   with:
-        #     name: dist-bin-and-packages
+        - name: Download packages and artifacts
+          uses: actions/download-artifact@v4
+          with:
+            name: dist-bin-and-packages
 
         - run: |
             echo "Test using script"
