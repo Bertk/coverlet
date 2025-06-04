@@ -164,6 +164,7 @@ jobs:
       if: always()
       with:
         files: "${{ github.workspace }}/artifacts/reports/**/*.trx"
+        check_name: "Unit Tests ${{ matrix.os }} ${{ matrix.framework }}"
 
     # - uses: bibipkins/dotnet-test-reporter@v1.5.4
     #   with:
