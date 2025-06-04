@@ -149,6 +149,14 @@ jobs:
       run: cat ./artifacts/reports/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
       shell: bash
 
+    - uses: bibipkins/dotnet-test-reporter@v1.5.4
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        comment-title: 'Unit Test Results'
+        results-path: ./artifacts/reports/*.trx
+        coverage-path: ./artifacts/reports/**/coverage.cobertura.xml
+        coverage-threshold: 80
+
     # - name: Upload coverage report artifact
     #   if: success() && matrix.os  == 'windows-latest'
     #   uses: actions/upload-artifact@v4
