@@ -61,6 +61,7 @@ jobs:
     #   uses: actions/upload-artifact@v4
     #   with:
     #     name: dist-bin-and-packages
+    #     retention-days: 5
     #     path: |
     #       artifacts/bin
     #       artifacts/package
@@ -152,6 +153,7 @@ jobs:
 
     - name: Upload Test Result Files
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: test-results
         path: ${{ github.workspace }}/artifacts/reports/**/*
@@ -161,7 +163,7 @@ jobs:
       uses: EnricoMi/publish-unit-test-result-action@v2.20.0
       if: always()
       with:
-        trx_files: "${{ github.workspace }}/artifacts/reports/**/*.trx"
+        files: "${{ github.workspace }}/artifacts/reports/**/*.trx"
 
     # - uses: bibipkins/dotnet-test-reporter@v1.5.4
     #   with:
