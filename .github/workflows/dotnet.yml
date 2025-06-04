@@ -60,6 +60,7 @@ jobs:
 
   test:
       name: Tests for .net core ${{ matrix.framework }} on ${{ matrix.os }}
+      needs: build
       runs-on: ${{ matrix.os }}
       strategy:
         matrix:
