@@ -24,6 +24,7 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
+      checks: write
 
     steps:
     - uses: actions/checkout@v4
@@ -132,7 +133,7 @@ jobs:
       uses: danielpalme/ReportGenerator-GitHub-Action@5
       if: success() && matrix.os  == 'windows-latest'
       with:
-        reports: ./artifacts/reports/**/coverage.cobertura.xml
+        reports: ./artifacts/reports/**/*.cobertura.xml
         assemblyfilters: -xunit*
         targetdir: ./artifacts/reports
         reporttypes: HtmlInline;Cobertura;MarkdownSummaryGithub;lcov
@@ -149,13 +150,26 @@ jobs:
       run: cat ./artifacts/reports/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
       shell: bash
 
-    - uses: bibipkins/dotnet-test-reporter@v1.5.4
+    - name: Upload Test Result Files
+      uses: actions/upload-artifact@v4
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        comment-title: 'Unit Test Results'
-        results-path: ./artifacts/reports/*.trx
-        coverage-path: ./artifacts/reports/**/coverage.cobertura.xml
-        coverage-threshold: 80
+        name: test-results
+        path: ${{ github.workspace }}/artifacts/reports/**/*
+        retention-days: 5
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2.20.0
+      if: always()
+      with:
+        trx_files: "${{ github.workspace }}/artifacts/reports/**/*.trx"
+
+    # - uses: bibipkins/dotnet-test-reporter@v1.5.4
+    #   with:
+    #     github-token: ${{ secrets.GITHUB_TOKEN }}
+    #     comment-title: 'Unit Test Results'
+    #     results-path: ./artifacts/reports/*.trx
+    #     coverage-path: ./artifacts/reports/**/*.cobertura.xml
+    #     coverage-threshold: 80
 
     # - name: Upload coverage report artifact
     #   if: success() && matrix.os  == 'windows-latest'
