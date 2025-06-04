@@ -12,6 +12,7 @@
     <MicrosoftCodeAnalysisVersion>4.13.0</MicrosoftCodeAnalysisVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
     <MicrosoftNETTestSdkVersion>17.13.0</MicrosoftNETTestSdkVersion>
+    <MicrosoftTestingPlatformVersion>1.7.1</MicrosoftTestingPlatformVersion>
     <NugetPackageVersion>6.13.2</NugetPackageVersion>
     <XunitV3Version>2.0.0</XunitV3Version>
     <XunitRunnerVisualstudioVersion>3.0.2</XunitRunnerVisualstudioVersion>
@@ -33,6 +34,8 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftNETTestSdkVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Platform" Version="1.7.1" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="$(MicrosoftTestingPlatformVersion)" />
     <PackageVersion Include="NuGet.Frameworks" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="NuGet.Packaging" Version="$(NugetPackageVersion)" />
     <PackageVersion Include="NuGet.Versioning" Version="$(NugetPackageVersion)" />
@@ -42,12 +45,14 @@
     <!--For test issue 809 https://github.com/coverlet-coverage/coverlet/issues/809-->
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="8.1.8" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageVersion Include="TUnit" Version="0.23.0" />
     <!--To test issue 1104 https://github.com/coverlet-coverage/coverlet/issues/1104-->
     <!-- latest Tmds.ExecFunction package uses EnvDTE V17.8.37221 -->
     <PackageVersion Include="Tmds.ExecFunction" Version="0.8.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.v3" Version="$(XunitV3Version)" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)" />
-    <PackageVersion Include="System.Buffers" Version="4.6.0" />
+    <PackageVersion Include="System.Buffers" Version="4.6.1" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />

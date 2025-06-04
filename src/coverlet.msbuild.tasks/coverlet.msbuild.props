@@ -17,6 +17,7 @@
     <ThresholdType Condition="$(ThresholdType) == ''">line,branch,method</ThresholdType>
     <ThresholdStat Condition="$(ThresholdStat) == ''">minimum</ThresholdStat>
     <ExcludeAssembliesWithoutSources Condition="$(ExcludeAssembliesWithoutSources) == ''"></ExcludeAssembliesWithoutSources>
+    <DisableManagedInstrumentationRestore  Condition="$(DisableManagedInstrumentationRestore) == ''">false</DisableManagedInstrumentationRestore>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
     <CoverletToolsPath Condition="'$(CoverletToolsPath)' == '' and '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tasks\net8.0\</CoverletToolsPath>

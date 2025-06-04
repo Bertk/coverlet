@@ -90,6 +90,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coverlet.tests.projectsampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.core.coverage.tests", "test\coverlet.core.coverage.tests\coverlet.core.coverage.tests.csproj", "{F74AD549-EFE0-4CD9-AD10-B2189E3FD5BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.MTP", "src\coverlet.MTP\coverlet.MTP.csproj", "{976491C7-114C-4FD4-92ED-AFD4BCD0BC18}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coverlet.MTP.tests", "test\coverlet.MTP.tests\coverlet.MTP.tests.csproj", "{2FF3F6C3-EB76-FA86-1BFB-5F419175B106}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -196,6 +200,14 @@ Global
 		{F74AD549-EFE0-4CD9-AD10-B2189E3FD5BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F74AD549-EFE0-4CD9-AD10-B2189E3FD5BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F74AD549-EFE0-4CD9-AD10-B2189E3FD5BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{976491C7-114C-4FD4-92ED-AFD4BCD0BC18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{976491C7-114C-4FD4-92ED-AFD4BCD0BC18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{976491C7-114C-4FD4-92ED-AFD4BCD0BC18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{976491C7-114C-4FD4-92ED-AFD4BCD0BC18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FF3F6C3-EB76-FA86-1BFB-5F419175B106}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FF3F6C3-EB76-FA86-1BFB-5F419175B106}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FF3F6C3-EB76-FA86-1BFB-5F419175B106}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FF3F6C3-EB76-FA86-1BFB-5F419175B106}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -227,6 +239,8 @@ Global
 		{0B109210-03CB-413F-888C-3023994AA384} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{71004336-9896-4AE5-8367-B29BB1680542} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 		{F74AD549-EFE0-4CD9-AD10-B2189E3FD5BB} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
+		{976491C7-114C-4FD4-92ED-AFD4BCD0BC18} = {E877EBA4-E78B-4F7D-A2D3-1E070FED04CD}
+		{2FF3F6C3-EB76-FA86-1BFB-5F419175B106} = {2FEBDE1B-83E3-445B-B9F8-5644B0E0E134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CA57C02-97B0-4C38-A027-EA61E8741F10}
