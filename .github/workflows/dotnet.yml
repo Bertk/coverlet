@@ -52,6 +52,17 @@ jobs:
         dotnet pack -c $BuildConfiguration
         dotnet pack -c release
 
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-bin-and-packages
+        path: |
+          artifacts/bin
+          artifacts/package
+          artifacts/publish
+          artifacts/log
+          *.binlog
+
   # Fail if there are any failed tests
   #
   # We support all current LTS versions of .NET and Windows, Mac and Linux.
@@ -82,6 +93,11 @@ jobs:
 #            source-url: https://pkgs.dev.azure.com/tonerdo/coverlet/_packaging/coverlet-nightly/nuget/v3/index.json
 #          env:
 #            NUGET_AUTH_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+
+        - name: Download packages and artifacts
+          uses: actions/download-artifact@v4
+          with:
+            name: dist-bin-and-packages
 
         - run: |
             echo "Test using script"
