@@ -159,29 +159,29 @@ jobs:
         path: ${{ github.workspace }}/artifacts/reports/**/*
         retention-days: 5
 
-    # - name: Publish Test Results
-    #   uses: EnricoMi/publish-unit-test-result-action@v2.20.0
-    #   if: always()
-    #   with:
-    #     files: |
-    #          ${{ github.workspace }}/artifacts/reports/**/*.trx
-    #          ${{ github.workspace }}/test/**/*.trx
-    #     check_name: "Unit Tests ${{ matrix.os }} ${{ matrix.framework }}"
-
-    - uses: bibipkins/dotnet-test-reporter@v1.5.4
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2.20.0
+      if: always()
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        comment-title: 'Unit Test Results'
-        results-path: |
-          ${{ github.workspace }}/artifacts/reports/**/*.trx
-          ${{ github.workspace }}/test/**/*.trx
-        coverage-path: |
-          ${{ github.workspace }}/artifacts/bin/**/*.cobertura.xml
-          ${{ github.workspace }}/artifacts/reports/**/*.cobertura.xml
-          ${{ github.workspace }}/test/**/*.cobertura.xml
-        coverage-threshold: 80
-        show-failed-tests-only: true
-        show-test-output: true
+        files: |
+             ${{ github.workspace }}/artifacts/reports/**/*.trx
+             ${{ github.workspace }}/test/**/*.trx
+        check_name: "Unit Tests ${{ matrix.os }} ${{ matrix.framework }}"
+
+    # - uses: bibipkins/dotnet-test-reporter@v1.5.4
+    #   with:
+    #     github-token: ${{ secrets.GITHUB_TOKEN }}
+    #     comment-title: 'Unit Test Results'
+    #     results-path: |
+    #       ${{ github.workspace }}/artifacts/reports/**/*.trx
+    #       ${{ github.workspace }}/test/**/*.trx
+    #     coverage-path: |
+    #       ${{ github.workspace }}/artifacts/bin/**/*.cobertura.xml
+    #       ${{ github.workspace }}/artifacts/reports/**/*.cobertura.xml
+    #       ${{ github.workspace }}/test/**/*.cobertura.xml
+    #     coverage-threshold: 80
+    #     show-failed-tests-only: true
+    #     show-test-output: true
 
     # - name: Upload coverage report artifact
     #   if: success() && matrix.os  == 'windows-latest'
