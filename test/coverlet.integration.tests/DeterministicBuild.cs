@@ -17,7 +17,8 @@ namespace Coverlet.Integration.Tests
   {
     private static readonly string s_projectName = "coverlet.integration.determisticbuild";
     private readonly string _buildTargetFramework;
-    private string[] _testProjectTfms = [];
+    //private string[] _testProjectTfms = [];
+    private string? _testProjectTfm;
     private readonly string _testProjectPath = TestUtils.GetTestProjectPath(s_projectName);
     private readonly string _testBinaryPath = TestUtils.GetTestBinaryPath(s_projectName);
     private readonly string _testResultsPath = TestUtils.GetTestResultsPath();
@@ -49,14 +50,16 @@ namespace Coverlet.Integration.Tests
                   new XElement("PropertyGroup",
                       new XElement("coverletMsbuildVersion", GetPackageVersion("*msbuild*.nupkg")),
                       new XElement("coverletCollectorsVersion", GetPackageVersion("*collector*.nupkg")))));
-      _testProjectTfms = XElement.Load(Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj"))!
-                         .Descendants("PropertyGroup")!
-                         .Single()
-                         .Element("TargetFrameworks")!
-                         .Value
-                         .Split(';');
+      //_testProjectTfms = XElement.Load(Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj"))!
+      //                   .Descendants("PropertyGroup")!
+      //                   .Single()
+      //                   .Element("TargetFrameworks")!
+      //                   .Value
+      //                   .Split(';');
+      _testProjectTfm = XElement.Load(Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj"))!.
+                 Descendants("PropertyGroup")!.Single().Element("TargetFramework")!.Value;
 
-      Assert.Contains(_buildTargetFramework, _testProjectTfms);
+      Assert.Contains(_buildTargetFramework, _testProjectTfm);
 
       deterministicTestProps.Save(Path.Combine(propsFile));
     }
