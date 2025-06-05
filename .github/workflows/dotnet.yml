@@ -159,48 +159,48 @@ jobs:
         path: ${{ github.workspace }}/artifacts/reports/**/*
         retention-days: 5
 
-    # - name: Publish Test Results
-    #   uses: EnricoMi/publish-unit-test-result-action/linux@v2
-    #   if: !cancelled() && matrix.os == 'ubuntu-latest'
-    #   with:
-    #     files: |
-    #          ${{ github.workspace }}/artifacts/reports/**/*.trx
-    #          ${{ github.workspace }}/test/**/*.trx
-    #     check_name: "Unit Tests ${{ matrix.os }}"
-
-    # - name: Publish Test Results
-    #   uses: EnricoMi/publish-unit-test-result-action/macos@v2
-    #   if: !cancelled() && matrix.os == 'macos-latest'
-    #   with:
-    #     files: |
-    #          ${{ github.workspace }}/artifacts/reports/**/*.trx
-    #          ${{ github.workspace }}/test/**/*.trx
-    #     check_name: "Unit Tests ${{ matrix.os }}"
-
-    # - name: Publish Test Results
-    #   uses: EnricoMi/publish-unit-test-result-action/windows@v2
-    #   if: !cancelled() && matrix.os  == 'windows-latest'
-    #   with:
-    #     files: |
-    #          ${{ github.workspace }}/artifacts/reports/**/*.trx
-    #          ${{ github.workspace }}/test/**/*.trx
-    #     check_name: "Unit Tests ${{ matrix.os }}"
-
-    - uses: bibipkins/dotnet-test-reporter@v1.5.4
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action/linux@v2
+      if: !cancelled() && matrix.os == 'ubuntu-latest'
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        comment-title: 'Unit Test Results ${{ matrix.os }}'
-        results-path: |
-          ./artifacts/reports/**/*.trx
-          ./test/**/*.trx
-        coverage-path: |
-          ./artifacts/bin/**/*.cobertura.xml
-          ./artifacts/reports/**/*.cobertura.xml
-          ./test/**/*.cobertura.xml
-        coverage-threshold: 80
-        coverage-type: cobertura
-        show-failed-tests-only: true
-        show-test-output: true
+        files: |
+             ${{ github.workspace }}/artifacts/reports/**/*.trx
+             ${{ github.workspace }}/test/**/*.trx
+        check_name: "Unit Tests ${{ matrix.os }}"
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action/macos@v2
+      if: !cancelled() && matrix.os == 'macos-latest'
+      with:
+        files: |
+             ${{ github.workspace }}/artifacts/reports/**/*.trx
+             ${{ github.workspace }}/test/**/*.trx
+        check_name: "Unit Tests ${{ matrix.os }}"
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action/windows@v2
+      if: !cancelled() && matrix.os  == 'windows-latest'
+      with:
+        files: |
+             ${{ github.workspace }}/artifacts/reports/**/*.trx
+             ${{ github.workspace }}/test/**/*.trx
+        check_name: "Unit Tests ${{ matrix.os }}"
+
+    # - uses: bibipkins/dotnet-test-reporter@v1.5.4
+    #   with:
+    #     github-token: ${{ secrets.GITHUB_TOKEN }}
+    #     comment-title: 'Unit Test Results ${{ matrix.os }}'
+    #     results-path: |
+    #       ./artifacts/reports/**/*.trx
+    #       ./test/**/*.trx
+    #     coverage-path: |
+    #       ./artifacts/bin/**/*.cobertura.xml
+    #       ./artifacts/reports/**/*.cobertura.xml
+    #       ./test/**/*.cobertura.xml
+    #     coverage-threshold: 80
+    #     coverage-type: cobertura
+    #     show-failed-tests-only: true
+    #     show-test-output: true
 
     # - name: Upload coverage report artifact
     #   if: success() && matrix.os  == 'windows-latest'
