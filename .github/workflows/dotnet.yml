@@ -191,12 +191,12 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         comment-title: 'Unit Test Results ${{ matrix.os }}'
         results-path: |
-          ${{ github.workspace }}/artifacts/reports/**/*.trx
-          ${{ github.workspace }}/test/**/*.trx
+          ./artifacts/reports/**/*.trx
+          ./test/**/*.trx
         coverage-path: |
-          ${{ github.workspace }}/artifacts/bin/**/*.cobertura.xml
-          ${{ github.workspace }}/artifacts/reports/**/*.cobertura.xml
-          ${{ github.workspace }}/test/**/*.cobertura.xml
+          ./artifacts/bin/**/*.cobertura.xml
+          ./artifacts/reports/**/*.cobertura.xml
+          ./test/**/*.cobertura.xml
         coverage-threshold: 80
         coverage-type: cobertura
         show-failed-tests-only: true
