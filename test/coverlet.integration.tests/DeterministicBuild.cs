@@ -16,6 +16,7 @@ namespace Coverlet.Integration.Tests
   public class DeterministicBuild : BaseTest, IDisposable
   {
     private static readonly string s_projectName = "coverlet.integration.determisticbuild";
+    private static readonly string s_sutName = "coverletsample.integration.determisticbuild";
     private readonly string _buildTargetFramework;
     //private string[] _testProjectTfms = [];
     private string? _testProjectTfm;
@@ -56,7 +57,7 @@ namespace Coverlet.Integration.Tests
       //                   .Element("TargetFrameworks")!
       //                   .Value
       //                   .Split(';');
-      _testProjectTfm = XElement.Load(Path.Combine(_testProjectPath, "coverlet.integration.determisticbuild.csproj"))!.
+      _testProjectTfm = XElement.Load(Path.Combine(_testProjectPath, $"{s_projectName}.csproj"))!.
                  Descendants("PropertyGroup")!.Single().Element("TargetFramework")!.Value;
 
       Assert.Contains(_buildTargetFramework, _testProjectTfm);
@@ -70,7 +71,7 @@ namespace Coverlet.Integration.Tests
       {
         bool coverageChecked = false;
         string reportFilePath = "";
-        foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput, reportName), reportName, SearchOption.AllDirectories))
+        foreach (string coverageFile in Directory.GetFiles(GetReportDirectory(standardOutput, reportName), reportName, SearchOption.AllDirectories))
         {
           Classes? document = JsonConvert.DeserializeObject<Modules>(File.ReadAllText(coverageFile))?.Document("DeepThought.cs");
           if (document != null)
@@ -90,9 +91,9 @@ namespace Coverlet.Integration.Tests
         {
           string newName = reportName.Replace("json", "cobertura.xml");
           // Verify deterministic report
-          foreach (string coverageFile in Directory.GetFiles(GetReportPath(standardOutput, newName), newName, SearchOption.AllDirectories))
+          foreach (string coverageFile in Directory.GetFiles(GetReportDirectory(standardOutput, newName), newName, SearchOption.AllDirectories))
           {
-            Assert.Contains("/_/test/coverlet.integration.determisticbuild/DeepThought.cs", File.ReadAllText(coverageFile));
+            Assert.Contains($"/_/test/{s_projectName}/DeepThought.cs", File.ReadAllText(coverageFile));
             File.Delete(coverageFile);
           }
         }
@@ -116,12 +117,12 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(buildOutput);
       }
       Assert.Contains("Build succeeded.", buildOutput);
-      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _artifactsPivot.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
+      string sourceRootMappingFilePath = GetSourceRootMappingFilePath(buildOutput, $"CoverletSourceRootsMapping_{s_sutName}");
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
       Assert.False(string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)));
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build /p:CollectCoverage=true /p:DeterministicReport=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true --results-directory:{testResultPath}";
+      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build /p:CollectCoverage=true /p:DeterministicReport=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:Include=\"[{s_sutName}]*DeepThought\" /p:IncludeTestAssembly=true --results-directory:{testResultPath}";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
@@ -134,11 +135,12 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
-      Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
-      string testResultFile = Path.Join(_testProjectPath, $"coverage.{_buildTargetFramework}.json");
+      Assert.Contains($"| {s_sutName} | 100% | 100%   | 100%   |", standardOutput);
+      string filename = "coverage.json";
+      string testResultFile = GetReportDirectory(standardOutput, filename) + filename;
       Assert.True(File.Exists(testResultFile), $"File '{testResultFile}' does not exist");
-      AssertCoverage(standardOutput, $"coverage.{_buildTargetFramework}.json");
-
+      //AssertCoverage(standardOutput, $"coverage.{_buildTargetFramework}.json");
+      AssertCoverage(standardOutput, filename);
       CleanupBuildOutput();
     }
 
@@ -159,13 +161,13 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(buildOutput);
       }
       Assert.Contains("Build succeeded.", buildOutput);
-      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _artifactsPivot.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
+      string sourceRootMappingFilePath = GetSourceRootMappingFilePath(buildOutput, $"CoverletSourceRootsMapping_{s_sutName}");
 
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
       Assert.False(string.IsNullOrEmpty(File.ReadAllText(sourceRootMappingFilePath)));
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:UseSourceLink=true /p:Include=\"[coverletsample.integration.determisticbuild]*DeepThought\" /p:IncludeTestAssembly=true --results-directory:{testResultPath}";
+      string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=\"cobertura%2cjson\" /p:UseSourceLink=true /p:Include=\"[{s_sutName}]*DeepThought\" /p:IncludeTestAssembly=true --results-directory:{testResultPath}";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
       if (!string.IsNullOrEmpty(standardError))
@@ -178,11 +180,13 @@ namespace Coverlet.Integration.Tests
       }
       Assert.Equal(0, result);
       Assert.Contains("Passed!", standardOutput);
-      Assert.Contains("| coverletsample.integration.determisticbuild | 100% | 100%   | 100%   |", standardOutput);
-      string testResultFile = Path.Join(_testProjectPath, $"coverage.{_buildTargetFramework}.json");
+      Assert.Contains($"| {s_sutName} | 100% | 100%   | 100%   |", standardOutput);
+      string filename = "coverage.json";
+      string testResultFile = GetReportDirectory(standardOutput, filename) + filename;
       Assert.True(File.Exists(testResultFile), $"File '{testResultFile}' does not exist");
       Assert.Contains("raw.githubusercontent.com", File.ReadAllText(testResultFile));
-      AssertCoverage(standardOutput, $"coverage.{_buildTargetFramework}.json", checkDeterministicReport: false);
+      //AssertCoverage(standardOutput, $"coverage.{_buildTargetFramework}.json", checkDeterministicReport: false);
+      AssertCoverage(standardOutput, filename, checkDeterministicReport: false);
 
       CleanupBuildOutput();
     }
@@ -208,13 +212,13 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(buildOutput);
       }
       Assert.Contains("Build succeeded.", buildOutput);
-      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _artifactsPivot.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
+      string sourceRootMappingFilePath = GetSourceRootMappingFilePath(buildOutput, $"CoverletSourceRootsMapping_{s_sutName}");
 
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
       Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-      string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", deterministicReport: true);
+      string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, $"[{s_sutName}]*DeepThought", deterministicReport: true);
       string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(testLogFilesPath, "log.txt")}";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
@@ -263,13 +267,13 @@ namespace Coverlet.Integration.Tests
         _output.WriteLine(buildOutput);
       }
       Assert.Contains("Build succeeded.", buildOutput);
-      string sourceRootMappingFilePath = Path.Combine(_testBinaryPath, _artifactsPivot.ToLowerInvariant(), "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild");
+      string sourceRootMappingFilePath = GetSourceRootMappingFilePath(buildOutput, $"CoverletSourceRootsMapping_{s_sutName}");
 
       Assert.True(File.Exists(sourceRootMappingFilePath), $"File not found: {sourceRootMappingFilePath}");
       Assert.NotEmpty(File.ReadAllText(sourceRootMappingFilePath));
       Assert.Contains("=/_/", File.ReadAllText(sourceRootMappingFilePath));
 
-      string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, "[coverletsample.integration.determisticbuild]*DeepThought", sourceLink: true);
+      string runSettingsPath = AddCollectorRunsettingsFile(_testProjectPath, $"[{s_sutName}]*DeepThought", sourceLink: true);
       string cmdArgument = $"test -c {_buildConfiguration} -f {_buildTargetFramework} --no-build --collect:\"XPlat Code Coverage\" --results-directory:\"{testResultPath}\" --settings \"{runSettingsPath}\" --diag:{Path.Combine(testLogFilesPath, "log.txt")}";
       _output.WriteLine($"Command: dotnet {cmdArgument}");
       int result = DotnetCli(cmdArgument, out string standardOutput, out string standardError, _testProjectPath);
@@ -380,7 +384,7 @@ namespace Coverlet.Integration.Tests
       }
     }
 
-    private string GetReportPath(string standardOutput, string reportFileName = "")
+    private string GetReportDirectory(string standardOutput, string reportFileName = "")
     {
       string reportPath = "";
       if (standardOutput.Contains(reportFileName))
@@ -390,6 +394,42 @@ namespace Coverlet.Integration.Tests
         reportPath = reportPath[..reportPath.IndexOf(reportFileName)];
       }
       return reportPath;
+    }
+
+    private static string GetSourceRootMappingFilePath(string buildOutput, string pattern)
+    {
+      // search file in path using pattern and return full path
+      // this will also handle filenames with prefix like ".msCoverletSourceRootsMapping_coverletsample.integration.determisticbuild" or "CoverletSourceRootsMapping_coverletsample.integration.determisticbuild"
+      // today both files exist
+      string sourceRootMappingFilePath = "";
+      if (buildOutput.Contains($"{s_sutName}.dll"))
+      {
+        string[] lines = buildOutput.Split('\n').Where(line => line.Contains(" -> ")).ToArray();
+        if (lines.Length == 0)
+        {
+          throw new InvalidOperationException("No lines found in build output containing ' -> '.");
+        }
+        else
+        {
+          string? directory = Path.GetDirectoryName(lines.FirstOrDefault(static line => line.Contains($"{s_sutName}.dll"))?.TrimStart());
+          if (directory == null)
+          {
+            throw new InvalidOperationException($"Directory is null. {s_sutName}.dll not found.");
+          }
+          // actual directory value "coverlet.integration.determisticbuild -> C:\GitHub\coverlet\artifacts\bin\coverlet.integration.determisticbuild\debug
+          // remove everything before '->' 
+          directory = directory[(directory.IndexOf("->") + 2)..].Trim();
+          if (Directory.Exists(directory))
+          {
+            string[] files = Directory.GetFiles(directory, $"{pattern}*", SearchOption.AllDirectories);
+            if (files.Length > 0)
+            {
+              sourceRootMappingFilePath = files[0];
+            }
+          }
+        }
+      }
+      return sourceRootMappingFilePath;
     }
     public void Dispose()
     {
