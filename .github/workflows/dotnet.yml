@@ -167,6 +167,8 @@ jobs:
              ${{ github.workspace }}/artifacts/reports/**/*.trx
              ${{ github.workspace }}/test/**/*.trx
         check_name: "Unit Tests ${{ matrix.os }}"
+        comment_mode: failures
+        compare_to_earlier_commit: false
 
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action/macos@v2
@@ -176,6 +178,8 @@ jobs:
              ${{ github.workspace }}/artifacts/reports/**/*.trx
              ${{ github.workspace }}/test/**/*.trx
         check_name: "Unit Tests ${{ matrix.os }}"
+        comment_mode: failures
+        compare_to_earlier_commit: false
 
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action/windows@v2
@@ -185,6 +189,8 @@ jobs:
              ${{ github.workspace }}/artifacts/reports/**/*.trx
              ${{ github.workspace }}/test/**/*.trx
         check_name: "Unit Tests ${{ matrix.os }}"
+        comment_mode: failures
+        compare_to_earlier_commit: false
 
     # - uses: bibipkins/dotnet-test-reporter@v1.5.4
     #   with:
