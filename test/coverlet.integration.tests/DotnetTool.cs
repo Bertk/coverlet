@@ -25,9 +25,8 @@ namespace Coverlet.Integration.Tests
       {
         _output.WriteLine(standardError);
       }
-      Assert.Contains("", standardError);
-      Assert.Contains("was successfully installed.", standardOutput);
       Assert.Empty(standardError);
+      Assert.Contains("was successfully installed.", standardOutput);
       return Path.Combine(projectPath, "coverletTool", "coverlet");
     }
 
