@@ -12,7 +12,7 @@
     <MicrosoftCodeAnalysisVersion>4.12.0</MicrosoftCodeAnalysisVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
     <MicrosoftNETTestSdkVersion>17.13.0</MicrosoftNETTestSdkVersion>
-    <NugetPackageVersion>6.13.2</NugetPackageVersion>
+    <NugetPackageVersion>6.14.0</NugetPackageVersion>
     <XunitV3Version>2.0.0</XunitV3Version>
     <XunitRunnerVisualstudioVersion>3.0.2</XunitRunnerVisualstudioVersion>
   </PropertyGroup>

@@ -36,8 +36,9 @@ namespace Coverlet.Console
       Option<string> output = new("--output", aliases: new[] { "--output", "-o" }) { Description = "Output of the generated coverage report", Arity = ArgumentArity.ZeroOrOne };
       Option<LogLevel> verbosity = new("--verbosity", aliases: new[] { "--verbosity", "-v" }) { DefaultValueFactory = (_) => LogLevel.Normal, Description = "Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed.", Arity = ArgumentArity.ZeroOrOne };
       Option<string[]> formats = new("--format", aliases: new[] { "--format", "-f" }) { DefaultValueFactory = (_) => new[] { "json" }, Description = "Format of the generated coverage report.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
+      formats.AcceptOnlyFromAmong("json", "lcov", "opencover", "cobertura", "teamcity");
       Option<string> threshold = new("--threshold") { Description = "Exits with error if the coverage % is below value.", Arity = ArgumentArity.ZeroOrOne };
-      Option<List<string>> thresholdTypes = new("--threshold-type") { DefaultValueFactory = (_) => new List<string>(new string[] { "line", "branch", "method" }), Description = ("Coverage type to apply the threshold to.") };
+      Option<List<string>> thresholdTypes = new("--threshold-type") { DefaultValueFactory = (_) => ["line", "branch", "method"], Description = "Coverage type to apply the threshold to." };
       thresholdTypes.AcceptOnlyFromAmong("line", "branch", "method");
       Option<ThresholdStatistic> thresholdStat = new("--threshold-stat") { DefaultValueFactory = (_) => ThresholdStatistic.Minimum, Description = "Coverage statistic used to enforce the threshold value.", Arity = ArgumentArity.ZeroOrOne };
       Option<string[]> excludeFilters = new("--exclude") { Description = "Filter expressions to exclude specific modules and types.", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
@@ -51,7 +52,8 @@ namespace Coverlet.Console
       Option<string> mergeWith = new("--merge-with") { Description = "Path to existing coverage result to merge.", Arity = ArgumentArity.ZeroOrOne };
       Option<bool> useSourceLink = new("--use-source-link") { Description = "Specifies whether to use SourceLink URIs in place of file system paths.", Arity = ArgumentArity.Zero };
       Option<string[]> doesNotReturnAttributes = new("--does-not-return-attribute") { Description = "Attributes that mark methods that do not return", Arity = ArgumentArity.ZeroOrMore, AllowMultipleArgumentsPerToken = true };
-      Option<string> excludeAssembliesWithoutSources = new("--exclude-assemblies-without-sources") { Description = "Specifies behaviour of heuristic to ignore assemblies with missing source documents.", Arity = ArgumentArity.ZeroOrOne };
+      Option<string> excludeAssembliesWithoutSources = new("--exclude-assemblies-without-sources") { DefaultValueFactory = (_) => "MissingAll", Description = "Specifies behavior of heuristic to ignore assemblies with missing source documents." };
+      excludeAssembliesWithoutSources.AcceptOnlyFromAmong("MissingAll", "MissingAny", "None");
       Option<string> sourceMappingFile = new("--source-mapping-file") { Description = "Specifies the path to a SourceRootsMappings file.", Arity = ArgumentArity.ZeroOrOne };
 
       RootCommand rootCommand = new("Cross platform .NET Core code coverage tool")
