@@ -3,13 +3,16 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <AssemblyTitle>Coverlet.MTP</AssemblyTitle>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
-    <DevelopmentDependency>true</DevelopmentDependency>
-    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
+    <NoWarn>$(NoWarn)</NoWarn>                                            
     <EnablePackageValidation>true</EnablePackageValidation>
+    <IsTestProject>true</IsTestProject>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <IsPackable>true</IsPackable>
+    <!--<GeneratePackageOnBuild>true</GeneratePackageOnBuild>-->
   </PropertyGroup>
 
   <PropertyGroup>
@@ -21,7 +24,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/tonerdo/coverlet/master/_assets/coverlet-icon.svg?sanitize=true</PackageIconUrl>
     <PackageIcon>coverlet-icon.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>coverage collector for Microsoft Testing Platform</Description>
+    <Description>coverage code coverage for Microsoft Testing Platform</Description>
     <PackageTags>coverage;microsoft-testing-platform;code-coverage</PackageTags>
     <PackageReadmeFile>Coverlet.MTP.Integration.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Changelog.md</PackageReleaseNotes>
@@ -30,7 +33,7 @@
 
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)..\..\_assets\coverlet-icon.png" Pack="true" PackagePath="\" />
-    <None Include="..\..\Documentation\Coverlet.MTP.Integration.md" Link="Coverlet.MTP.Integration.md" Pack="true" PackagePath="\" >
+    <None Include="..\..\Documentation\Coverlet.MTP.Integration.md" Link="Coverlet.MTP.Integration.md" Pack="true" PackagePath="\">
       <PackageCopyToOutput>true</PackageCopyToOutput>
     </None>
   </ItemGroup>
@@ -42,24 +45,22 @@
     <PackageReference Include="System.Memory" />
   </ItemGroup>
 
-  <!--<ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
-    <PackageReference Include="System.Buffers" />
-    <PackageReference Include="System.Memory" />
-  </ItemGroup>-->
-
   <ItemGroup>
-    <ProjectReference Include="..\coverlet.core\coverlet.core.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\coverlet.core\coverlet.core.csproj" />
   </ItemGroup>
 
-  <Target Name="PackBuildOutputs" DependsOnTargets="BuildOnlySettings;ResolveReferences">
-    <ItemGroup>
-      <!--<TfmSpecificPackageFile Include="build\coverlet.collector.targets" PackagePath="build\$(TargetFramework)" />-->
-      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="$(ProjectDepsFilePath)" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="@(DebugSymbolsProjectOutputGroupOutput)" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="%(_ResolvedProjectReferencePaths.Identity)" PackagePath="build\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="@(ReferenceCopyLocalPaths)" Exclude="@(_ResolvedProjectReferencePaths)" PackagePath="build\$(TargetFramework)\%(ReferenceCopyLocalPaths.DestinationSubPath)" />
-    </ItemGroup>
-  </Target>
+  <!-- NuGet package layout -->
+  <!-- NuGet folders https://learn.microsoft.com/nuget/create-packages/creating-a-package#from-a-convention-based-working-directory -->
+  <ItemGroup>
+    <Content Include="buildMultiTargeting/**" Pack="true">
+      <PackagePath>buildMultiTargeting</PackagePath>
+    </Content>
+    <TfmSpecificPackageFile Include="buildTransitive/**">
+      <PackagePath>buildTransitive/$(TargetFramework)</PackagePath>
+    </TfmSpecificPackageFile>
+    <TfmSpecificPackageFile Include="build/**">
+      <PackagePath>build/$(TargetFramework)</PackagePath>
+    </TfmSpecificPackageFile>
+  </ItemGroup>
 
 </Project>
