@@ -161,7 +161,7 @@ jobs:
 
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action/linux@v2
-      if: !cancelled() && matrix.os == 'ubuntu-latest'
+      if: ${{ !cancelled() && matrix.os == 'ubuntu-latest' }}
       with:
         files: |
              ${{ github.workspace }}/artifacts/reports/**/*.trx
@@ -172,7 +172,7 @@ jobs:
 
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action/macos@v2
-      if: !cancelled() && matrix.os == 'macos-latest'
+      if: ${{ !cancelled() && matrix.os == 'macos-latest' }}
       with:
         files: |
              ${{ github.workspace }}/artifacts/reports/**/*.trx
@@ -183,7 +183,7 @@ jobs:
 
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action/windows@v2
-      if: !cancelled() && matrix.os  == 'windows-latest'
+      if: ${{ !cancelled() && matrix.os  == 'windows-latest' }}
       with:
         files: |
              ${{ github.workspace }}/artifacts/reports/**/*.trx
