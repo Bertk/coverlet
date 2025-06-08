@@ -38,12 +38,11 @@ namespace coverlet.Extension
       // see https://learn.microsoft.com/en-us/dotnet/api/system.commandline.argumentarity?view=system-commandline
       //      ExactlyOne            - An arity that must have exactly one value.
       //      MaximumNumberOfValues - Gets the maximum number of values allowed for an argument.
-      //      MinimumNumberOfValues - Gets the minimum number of values required for an argument. 
+      //      MinimumNumberOfValues - Gets the minimum number of values required for an argument.
       //      OneOrMore             - An arity that must have at least one value.
       //      Zero                  - An arity that does not allow any values.
       //      ZeroOrMore            - An arity that may have multiple values.
       //      ZeroOrOne             - An arity that may have one value, but no more than one.
-
 
       return
           [
