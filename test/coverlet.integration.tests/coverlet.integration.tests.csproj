@@ -32,4 +32,8 @@
     <ProjectReference Include="$(RepoRoot)test\coverlet.integration.template\coverlet.integration.template.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Remove="Microsoft.CodeAnalysis.BannedApiAnalyzers" />
+  </ItemGroup>
+  
 </Project>
