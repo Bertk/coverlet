@@ -28,9 +28,23 @@ namespace coverlet.Extension
     public string DisplayName => _extension.DisplayName;
 
     public string Description => _extension.Description;
+    internal static readonly string[] s_sourceArray = new[] { "json", "lcov", "opencover", "cobertura", "teamcity" };
 
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {
+      // Microsoft.Testing.Platform.Extensions.CommandLine does not a default value for LineOptions
+      // Default value can be handled in validation
+
+      // see https://learn.microsoft.com/en-us/dotnet/api/system.commandline.argumentarity?view=system-commandline
+      //      ExactlyOne            - An arity that must have exactly one value.
+      //      MaximumNumberOfValues - Gets the maximum number of values allowed for an argument.
+      //      MinimumNumberOfValues - Gets the minimum number of values required for an argument. 
+      //      OneOrMore             - An arity that must have at least one value.
+      //      Zero                  - An arity that does not allow any values.
+      //      ZeroOrMore            - An arity that may have multiple values.
+      //      ZeroOrOne             - An arity that may have one value, but no more than one.
+
+
       return
           [
               new CommandLineOption(name: "formats", description: "Specifies the output formats for the coverage report (e.g., 'json', 'lcov').", arity: ArgumentArity.OneOrMore, isHidden: false),
@@ -52,14 +66,20 @@ namespace coverlet.Extension
     {
       if (commandOption.Name == "formats")
       {
+        // When no arguments are provided, validation should pass (default "json" will be used)
         if (arguments.Length == 0)
         {
-          return Task.FromResult(ValidationResult.Invalid("At least one format must be specified."));
+          return ValidationResult.ValidTask;
         }
-        if (!arguments[0].Contains("json") && !arguments[0].Contains("lcov") && !arguments[0].Contains("opencover") && !arguments[0].Contains("cobertura") && !arguments[0].Contains("teamcity"))
+        // Validate provided formats
+        foreach (string format in arguments)
         {
-          return Task.FromResult(ValidationResult.Invalid($"The value '{arguments[0]}' is not a valid option for '{commandOption.Name}'."));
+          if (!s_sourceArray.Contains(format))
+          {
+            return Task.FromResult(ValidationResult.Invalid($"The value '{format}' is not a valid option for '{commandOption.Name}'."));
+          }
         }
+        return ValidationResult.ValidTask;
       }
       if (commandOption.Name == "exclude-assemblies-without-sources")
       {
