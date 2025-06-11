@@ -237,34 +237,27 @@ namespace Coverlet.Core.Helpers
     /// </summary>
     /// <param name="module">The path to the module to be backed up.</param>
     /// <param name="identifier">A unique identifier to distinguish the backup file.</param>
-    public void BackupOriginalModule(string module, string identifier)
-    {
-      BackupOriginalModule(module, identifier, true);
-    }
-
-    /// <summary>
-    /// Backs up the original module to a specified location.
-    /// </summary>
-    /// <param name="module">The path to the module to be backed up.</param>
-    /// <param name="identifier">A unique identifier to distinguish the backup file.</param>
-    /// <param name="withBackupList">Indicates whether to add the backup to the backup list. Required for test TestBackupOriginalModule</param>
-    public void BackupOriginalModule(string module, string identifier, bool withBackupList)
+    /// <param name="disableManagedInstrumentationRestore"></param>
+    public void BackupOriginalModule(string module, string identifier, bool disableManagedInstrumentationRestore)
     {
       string backupPath = GetBackupPath(module, identifier);
       string backupSymbolPath = Path.ChangeExtension(backupPath, ".pdb");
-      _fileSystem.Copy(module, backupPath, true);
-      if (withBackupList && !_backupList.TryAdd(module, backupPath))
+      if (!disableManagedInstrumentationRestore)
       {
-        throw new ArgumentException($"Key already added '{module}'");
-      }
-
-      string symbolFile = Path.ChangeExtension(module, ".pdb");
-      if (_fileSystem.Exists(symbolFile))
-      {
-        _fileSystem.Copy(symbolFile, backupSymbolPath, true);
-        if (withBackupList && !_backupList.TryAdd(symbolFile, backupSymbolPath))
+        _fileSystem.Copy(module, backupPath, true);
+        if (!_backupList.TryAdd(module, backupPath))
         {
           throw new ArgumentException($"Key already added '{module}'");
+        }
+
+        string symbolFile = Path.ChangeExtension(module, ".pdb");
+        if (_fileSystem.Exists(symbolFile))
+        {
+          _fileSystem.Copy(symbolFile, backupSymbolPath, true);
+          if (!_backupList.TryAdd(symbolFile, backupSymbolPath))
+          {
+            throw new ArgumentException($"Key already added '{module}'");
+          }
         }
       }
     }
@@ -415,8 +408,10 @@ namespace Coverlet.Core.Helpers
     }
 
     private static string CreateRegexExcludePattern(IEnumerable<string> filters, char escapeSymbol)
-      //only look for module filters here, types will be filtered out when instrumenting 
+      //only look for module filters here, types will be filtered out when instrumenting
+#pragma warning disable IDE0057 // Use range operator
       => CreateRegexPattern(filters, escapeSymbol, filter => filter.Substring(filter.IndexOf(']') + 1) == "*");
+#pragma warning restore IDE0057 // Use range operator
 
     private static string CreateRegexIncludePattern(IEnumerable<string> filters, char escapeSymbol) =>
       CreateRegexPattern(filters, escapeSymbol);
@@ -424,8 +419,10 @@ namespace Coverlet.Core.Helpers
     private static string CreateRegexPattern(IEnumerable<string> filters, char escapeSymbol, Func<string, bool> filterPredicate = null)
     {
       IEnumerable<string> filteredFilters = filterPredicate != null ? filters.Where(filterPredicate) : filters;
+#pragma warning disable IDE0057 // Use range operator
       IEnumerable<string> regexPatterns = filteredFilters.Select(x =>
         $"{escapeSymbol}{WildcardToRegex(x.Substring(1, x.IndexOf(']') - 1)).Trim('^', '$')}{escapeSymbol}");
+#pragma warning restore IDE0057 // Use range operator
       return string.Join("|", regexPatterns);
     }
 
