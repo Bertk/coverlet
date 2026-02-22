@@ -71,7 +71,7 @@
 
   <Target Name="CopyExcludedByAttributeAssets" AfterTargets="Build">
     <ItemGroup>
-      <ExcludedByAttributeFiles Include="$(RepoRoot)artifacts\$(ArtifactsBinOutputName)\coverlet.tests.projectsample.excludedbyattribute\debug\*.*" />
+      <ExcludedByAttributeFiles Include="$(RepoRoot)artifacts\$(ArtifactsBinOutputName)\coverlet.tests.projectsample.excludedbyattribute\$(Configuration.ToLowerInvariant())\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(ExcludedByAttributeFiles)" DestinationFolder="$(OutputPath)TestAssets" SkipUnchangedFiles="true" />
   </Target>
