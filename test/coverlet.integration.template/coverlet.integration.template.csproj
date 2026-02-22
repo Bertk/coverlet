@@ -1,17 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <!--<TargetFrameworks>$(NetCurrent);$(NetMinimum)</TargetFrameworks>-->
+    <TargetFrameworks>net10.0;net8.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AssemblyName>coverletsamplelib.integration.template</AssemblyName>
     <IsTestProject>false</IsTestProject>
     <OutputType>Exe</OutputType>
     <GenerateProgramFile>false</GenerateProgramFile>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <!-- Testing with VSTest target is no longer supported by Microsoft.Testing.Platform on .NET 10 SDK and later. -->
+    <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
+    <PackageReference Include="xunit.v3" Version="$(XunitV3Version)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

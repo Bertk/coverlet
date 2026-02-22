@@ -13,6 +13,8 @@
       https://api.nuget.org/v3/index.json;
       $(RepoRoot)artifacts/package/$(Configuration.ToLowerInvariant())
     </RestoreSources>
+    <!-- Testing with VSTest target is no longer supported by Microsoft.Testing.Platform on .NET 10 SDK and later.-->
+    <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
 
   <!-- Define default values if props file doesn't exist -->
@@ -33,7 +35,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="xunit.v3.mtp-v2" Version="$(XunitV3Version)" />
+    <PackageReference Include="xunit.v3" Version="$(XunitV3Version)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

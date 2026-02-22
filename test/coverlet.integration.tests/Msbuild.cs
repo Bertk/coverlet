@@ -13,13 +13,11 @@ namespace Coverlet.Integration.Tests
   {
     private readonly string _buildConfiguration;
     private readonly string _buildTargetFramework;
-    private readonly ITestOutputHelper _output;
 
-    public Msbuild(ITestOutputHelper output)
+    public Msbuild(ITestOutputHelper output) : base(output)
     {
       _buildConfiguration = TestUtils.GetBuildConfigurationString();
       _buildTargetFramework = TestUtils.GetAssemblyTargetFramework();
-      _output = output;
     }
 
     private ClonedTemplateProject PrepareTemplateProject()
