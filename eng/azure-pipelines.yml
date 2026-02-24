@@ -53,6 +53,20 @@ jobs:
       breakBuild: false
       condition: and(succeeded(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
 
+- job: Legacy
+  displayName:  Legacy Windows
+  continueOnError: 'true'
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  strategy:
+    matrix:
+      Debug:
+        buildConfiguration: "debug"
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - template: build-legacy.yml
+
 - job: macOS
   displayName: macOS
   continueOnError: 'true'

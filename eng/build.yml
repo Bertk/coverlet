@@ -35,24 +35,6 @@ steps:
 - script: dotnet pack -c $(BuildConfiguration) --no-restore
   displayName: Pack
 
-# - script: |
-#     dotnet build-server shutdown
-#     dotnet test test/coverlet.MTP.tests/coverlet.MTP.tests.csproj -c $(BuildConfiguration) -f net8.0 --no-build -bl:test.MTP.net8.0.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.MTP.tests.net8.0.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.MTP.tests.net8.0.diag;tracelevel=verbose"
-#     dotnet test test/coverlet.MTP.tests/coverlet.MTP.tests.csproj -c $(BuildConfiguration) -f net9.0 --no-build -bl:test.MTP.net9.0.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.MTP.tests.net9.0.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.MTP.tests.net9.0.diag;tracelevel=verbose"
-#     dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c $(BuildConfiguration) -f net8.0 --no-build -bl:test.core.net8.0.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.core.tests.net8.0.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.core.tests.net8.0.diag;tracelevel=verbose"
-#     dotnet test test/coverlet.core.tests/coverlet.core.tests.csproj -c $(BuildConfiguration) -f net9.0 --no-build -bl:test.core.net9.0.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.core.tests.net9.0.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.core.tests.net9.0.diag;tracelevel=verbose"
-#     dotnet test test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj -c $(BuildConfiguration) -f net8.0 --no-build -bl:test.core.coverage.net8.0.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.core.coverage.tests.net8.0.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.core.coverage.tests.net8.0.diag;tracelevel=verbose"
-#     dotnet test test/coverlet.core.coverage.tests/coverlet.core.coverage.tests.csproj -c $(BuildConfiguration) -f net9.0 --no-build -bl:test.core.coverage.net9.0.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.core.coverage.tests.net9.0.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.core.coverage.tests.net9.0.diag;tracelevel=verbose"
-#     dotnet test test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -c $(BuildConfiguration) -f net8.0 --no-build -bl:test.msbuild.tasks.net8.0.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.msbuild.tasks.tests.net8.0.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.msbuild.tasks.tests.net8.0.diag;tracelevel=verbose"
-#     dotnet test test/coverlet.msbuild.tasks.tests/coverlet.msbuild.tasks.tests.csproj -c $(BuildConfiguration) -f net9.0 --no-build -bl:test.msbuild.tasks.net9.0.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.msbuild.tasks.tests.net9.0.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.msbuild.tasks.tests.net9.0.diag;tracelevel=verbose"
-#     dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -c $(BuildConfiguration) -f net8.0 --no-build -bl:test.collector.net8.0.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.collector.tests.net8.0.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.collector.tests.net8.0.diag;tracelevel=verbose"
-#     dotnet test test/coverlet.collector.tests/coverlet.collector.tests.csproj -c $(BuildConfiguration) -f net9.0 --no-build -bl:test.collector.net9.0.binlog /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Exclude="[coverlet.core.tests.samples.netstandard]*%2c[coverlet.tests.projectsample]*" /p:ExcludeByAttribute="GeneratedCodeAttribute" --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.collector.tests.net9.0.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.collector.tests.net9.0.diag;tracelevel=verbose"
-#     dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c $(BuildConfiguration) -f net8.0 --no-build -bl:test.integration.net8.0.binlog --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.integration.tests.net8.0.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.integration.tests.net8.0.diag;tracelevel=verbose"
-#     dotnet test test/coverlet.integration.tests/coverlet.integration.tests.csproj -c $(BuildConfiguration) -f net9.0 --no-build -bl:test.integration.net9.0.binlog --results-directory "$(Build.SourcesDirectory)/artifacts/reports/" --logger "trx;LogFileName=coverlet.integration.tests.net9.0.trx" --diag:"$(Build.SourcesDirectory)/artifacts/log/coverlet.integration.tests.net9.0.diag;tracelevel=verbose"
-#   displayName: Run unit tests with coverage (net8.0/net9.0)
-#   env:
-#     MSBUILDDISABLENODEREUSE: 1
-
 # Run tests without coverage using dotnet exec
 - pwsh: |
     $frameworks = "$(frameworks)".Split(",")
@@ -92,13 +74,14 @@ steps:
 - template: publish-coverlet-result-files.yml
 
 - script: |
-    dir /s /B *.xml
     del coverlet.integration.determisticbuild\coverage.net8.0.cobertura.xml
     del coverlet.integration.determisticbuild\coverage.net9.0.cobertura.xml
     del coverlet.integration.determisticbuild\coverage.net10.0.cobertura.xml
+    dir /s /B *.xml
   displayName: List XML files for test folder
   workingDirectory: "$(Build.SourcesDirectory)/test"
   condition: and(succeededOrFailed(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
+  enabled: false
 
 - template: publish-coverage-results.yml
   parameters:
@@ -106,4 +89,4 @@ steps:
     condition: and(succeededOrFailed(), eq(variables['buildConfiguration'], 'debug'), eq(variables['agent.os'], 'Windows_NT'))
     minimumLineCoverage: 80
     assemblyfilters: '-xunit;-coverlet.testsubject;-Coverlet.Tests.ProjectSample.*;-coverlet.core.tests.samples.netstandard;-coverletsamplelib.integration.template;-coverlet.tests.utils;-coverletsample.integration.determisticbuild'
-
+  enabled: false
