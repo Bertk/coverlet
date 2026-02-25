@@ -64,6 +64,9 @@ jobs:
         buildConfiguration: "debug"
   pool:
     vmImage: 'windows-latest'
+  variables:
+    frameworks: 'net8.0,net9.0'
+    LEGACY: 'true'
   steps:
   - template: build-legacy.yml
 
