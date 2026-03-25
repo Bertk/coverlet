@@ -7,7 +7,7 @@
     <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.9.50" />
   </ItemGroup>
   <PropertyGroup>
-    <MicrosoftBuildVersion>17.11.48</MicrosoftBuildVersion>
+    <MicrosoftBuildVersion>18.4.0</MicrosoftBuildVersion>
     <!-- .NET 8.0 support -->
     <MicrosoftCodeAnalysisVersion>5.0.0</MicrosoftCodeAnalysisVersion>
     <!-- .NET 8.0 support -->
