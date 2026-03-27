@@ -6,7 +6,7 @@ This document summarizes the investigation of open GitHub issues related to bran
 
 | Issue # | Title | Status | Category | Priority | Fix Approach |
 |---------|-------|--------|----------|----------|--------------|
-| #1836 | Wrong branch rate on IAsyncEnumerable | Active | Compiler-Generated | High | Enhance `SkipGeneratedBranchesForAsyncIterator` |
+| #1836 | Wrong branch rate on IAsyncEnumerable | Active | Compiler-Generated | High | Consume [PR #31](https://github.com/daveMueller/coverlet/pull/31), enhance Skip methods |
 | #1786 | False positive branch coverage for `if` without `else` | Active | By-Design | Low | Documentation / Configuration |
 | #1751 | False positive due to short-circuiting operators | Active | By-Design | Low | Documentation / Configuration |
 | #1842 | No coverage reported for .NET Framework with 8.0.1 | Active | Driver Issue | Medium | Investigate msbuild driver |
@@ -30,10 +30,34 @@ SkipGeneratedBranchesForAsyncIterator() - Handles state switch and dispose check
 SkipGeneratedBranchesForEnumeratorCancellationAttribute() - Handles combined tokens
 ```
 
-**Potential Fix:** Investigate if there are additional compiler-generated branch patterns specific to newer C# compiler versions that are not yet filtered. This requires:
-1. Creating a repro case with the specific IAsyncEnumerable pattern
-2. Disassembling the IL to identify unhandled branch patterns
-3. Adding new Skip method or extending existing ones
+**External PR with Regression Test:** [daveMueller/coverlet#31](https://github.com/daveMueller/coverlet/pull/31)
+
+This PR provides:
+1. **Sample code** (`Instrumentation.AsyncIterator.cs`) - A reproduction case with `IAsyncEnumerable<int>` using `[EnumeratorCancellation]`:
+   ```csharp
+   public async IAsyncEnumerable<int> GetNumbersAsync(
+       [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+   {
+       int[] items = [1, 2];
+       foreach (var item in items)
+       {
+           await Task.CompletedTask;
+           yield return !cancellationToken.IsCancellationRequested ? item : throw new OperationCanceledException();
+       }
+   }
+   ```
+
+2. **Regression test** (`CoverageTests.AsyncIterator.cs`) - Test `AsyncIterator_Issue1836` that exercises:
+   - Normal iteration (all items consumed, ternary true-branch)
+   - Cancelled iteration (`cts.Token` pre-cancelled, ternary throws)
+
+3. **Key Finding:** The `foreach` branches are reported at ordinals 2 and 3 (not 0 and 1) because the compiler-generated state machine for `[EnumeratorCancellation]` token-combining logic consumes ordinals 0 and 1. On .NET 8 these do not surface as phantom uncovered branches in the data, but the shifted ordinals are a direct artefact of the same compiler code generation that causes the issue on .NET 9.
+
+**Action Items:**
+1. ✅ Repro case created (available in PR #31)
+2. Consume test and sample from PR #31 into coverlet main repository
+3. Analyze IL patterns with ILDasm/ILSpy for .NET 9 compiler differences
+4. Add new Skip method or extend existing ones to handle .NET 9 patterns
 
 **Priority:** High - This is a genuine bug where compiler-generated code inflates branch metrics.
 
@@ -140,9 +164,10 @@ The `CecilSymbolHelper.cs` file contains numerous `Skip*` methods that filter ou
 ### Actionable Issues (Can Be Fixed)
 
 1. **#1836 - IAsyncEnumerable Wrong Branch Rate**
-   - Create detailed repro case
-   - Analyze IL patterns with ILDasm/ILSpy
-   - Identify missing skip patterns
+   - ✅ Repro case available in [daveMueller/coverlet#31](https://github.com/daveMueller/coverlet/pull/31)
+   - Consume sample and test from PR #31
+   - Analyze IL patterns with ILDasm/ILSpy (especially .NET 9 differences)
+   - Identify missing skip patterns for shifted branch ordinals
    - Add new filtering logic to `CecilSymbolHelper`
 
 ### Documentation Issues (Explain Behavior)
