@@ -1393,7 +1393,10 @@ namespace Coverlet.Core.Symbols
 
     public bool SkipInlineAssignedAutoProperty(bool skipAutoProps, MethodDefinition methodDefinition, Instruction instruction)
     {
-      if (!skipAutoProps) return false;
+      if (!skipAutoProps || !methodDefinition.IsConstructor || instruction.OpCode != OpCodes.Ldarg)
+      {
+        return false;
+      }
       return SkipGeneratedBackingFieldAssignment(methodDefinition, instruction);
     }
 
