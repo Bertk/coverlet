@@ -51,7 +51,7 @@ namespace Coverlet.CoreCoverage.Tests
     }
 
     /// <summary>
-    /// Regression test for issue #1633: abstract records without primary constructor
+    /// Regression test for issue #1633: abstract records with and without a primary constructor
     /// and their concrete subrecords are correctly instrumented.
     /// </summary>
     [Theory]
