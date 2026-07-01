@@ -72,9 +72,20 @@ jobs:
          mkdir ./artifacts/package/debug
          mkdir ./artifacts/package/release
 
-    - run: |
+    - name: Debug env file pointers
+      run: |
+        echo "GITHUB_ENV=$GITHUB_ENV"
+        echo "GITHUB_OUTPUT=$GITHUB_OUTPUT"
+
+    - name: Build
+      run: |
         echo "Run, Build Application using script"
         dotnet build coverlet.slnx --configuration Debug
+
+    - name: Debug env file pointers
+      run: |
+        echo "GITHUB_ENV=$GITHUB_ENV"
+        echo "GITHUB_OUTPUT=$GITHUB_OUTPUT"
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
