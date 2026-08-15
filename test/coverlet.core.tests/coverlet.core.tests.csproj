@@ -22,6 +22,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Testing.Extensions.AzureDevOpsReport" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Moq" />
     <PackageReference Include="ReportGenerator.Core" />
     <PackageReference Include="System.Linq.Async" />

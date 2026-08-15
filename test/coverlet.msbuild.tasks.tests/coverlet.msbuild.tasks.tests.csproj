@@ -21,6 +21,7 @@
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Testing.Extensions.AzureDevOpsReport" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Microsoft.Build.Framework">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
