@@ -72,6 +72,56 @@ internal sealed class CoverletExtensionCommandLineProvider : ICommandLineOptions
         return Task.FromResult(ValidationResult.Invalid($"The value '{arguments[0]}' is not a valid option for '{commandOption.Name}'."));
       }
     }
+
+    if (commandOption.Name == CoverletOptionNames.Threshold)
+    {
+      if (arguments.Length == 0)
+      {
+        return Task.FromResult(ValidationResult.Invalid($"At least one value must be specified for '{commandOption.Name}'."));
+      }
+      if (arguments.Length > 1)
+      {
+        return Task.FromResult(ValidationResult.Invalid($"Only one value is allowed for '{commandOption.Name}'."));
+      }
+      if (!int.TryParse(arguments[0], out int thresholdValue) || thresholdValue < 0 || thresholdValue > 100)
+      {
+        return Task.FromResult(ValidationResult.Invalid($"The value '{arguments[0]}' is not a valid option for '{commandOption.Name}'. It must be an integer between 0 and 100."));
+      }
+    }
+
+    // Validate ThresholdType option to ensure it has a valid value.
+    if (commandOption.Name == CoverletOptionNames.ThresholdType)
+    {
+      if (arguments.Length == 0)
+      {
+        return Task.FromResult(ValidationResult.Invalid($"At least one value must be specified for '{commandOption.Name}'."));
+      }
+      if (arguments.Length > 1)
+      {
+        return Task.FromResult(ValidationResult.Invalid($"Only one value is allowed for '{commandOption.Name}'."));
+      }
+      if (!arguments[0].Contains("line") && !arguments[0].Contains("branch") && !arguments[0].Contains("method"))
+      {
+        return Task.FromResult(ValidationResult.Invalid($"The value '{arguments[0]}' is not a valid option for '{commandOption.Name}' (line, branch, method)."));
+      }
+    }
+
+    // Validate the ThresholdStat option to ensure it has a valid value
+    if (commandOption.Name == CoverletOptionNames.ThresholdStat)
+    {
+      if (arguments.Length == 0)
+      {
+        return Task.FromResult(ValidationResult.Invalid($"At least one value must be specified for '{commandOption.Name}'."));
+      }
+      if (arguments.Length > 1)
+      {
+        return Task.FromResult(ValidationResult.Invalid($"Only one value is allowed for '{commandOption.Name}'."));
+      }
+      if (!arguments[0].Contains("total") && !arguments[0].Contains("average") && !arguments[0].Contains("minimum"))
+      {
+        return Task.FromResult(ValidationResult.Invalid($"The value '{arguments[0]}' is not a valid option for '{commandOption.Name}'(total, average, minimum)."));
+      }
+    }
     return ValidationResult.ValidTask;
   }
 

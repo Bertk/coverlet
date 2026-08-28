@@ -18,4 +18,7 @@ internal static class CoverletOptionNames
   public const string SkipAutoProps = "coverlet-skip-auto-props";
   public const string DoesNotReturnAttribute = "coverlet-does-not-return-attribute";
   public const string ExcludeAssembliesWithoutSources = "coverlet-exclude-assemblies-without-sources";
+  public const string Threshold = "coverlet-threshold";
+  public const string ThresholdType = "coverlet-threshold-type";
+  public const string ThresholdStat = "coverlet-threshold-stat";
 }

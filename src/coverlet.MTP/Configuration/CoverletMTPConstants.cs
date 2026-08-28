@@ -31,4 +31,7 @@ internal static class CoverletMTPConstants
   public const string DeterministicReportKey = "DeterministicReport";
   public const string ExcludeAssembliesWithoutSourcesKey = "ExcludeAssembliesWithoutSources";
   public const string DisableManagedInstrumentationRestoreKey = "DisableManagedInstrumentationRestore";
+  public const string ThresholdKey = "Threshold";
+  public const string ThresholdStatKey = "ThresholdStat";
+  public const string ThresholdTypeFlagValuesKey = "ThresholdType";
 }
