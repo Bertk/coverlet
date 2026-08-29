@@ -9,11 +9,11 @@ In the table below we keep track of main differences:
 | Feature                            | MSBuild       | .NET Tool    | VS DataCollector  | MTP Extension |
 |:-----------------------------------|:--------------|:-------------|:------------------|:--------------|
 | .NET Core support(>= 8.0)          | Yes           | Yes          | Yes               | Yes           |
-| .NET Framework support(>= 4.7.2)   | Yes           | Yes          | Yes(since 3.0.0)  | No            |
+| .NET Framework support(>= 4.7.2)   | Yes           | Yes          | Yes(since 3.0.0)  | Yes           |
 | Show result on console             | Yes           | Yes          | No                | Yes           |
 | Deterministic reports output folder| Yes           | Yes          | No                | No            |
 | Merge reports                      | Yes           | Yes          | No                | No            |
-| Coverage threshold validation      | Yes           | Yes          | No                | No            |
+| Coverage threshold validation      | Yes           | Yes          | No                | Yes           |
 | Deterministic build support        | Yes           | No           | Yes               | No            |
 
 > [!TIP]

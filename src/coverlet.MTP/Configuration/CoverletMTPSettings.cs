@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Text;
+using Coverlet.Core.Enums;
 
 namespace Coverlet.MTP.Configuration;
 
@@ -33,7 +34,9 @@ public class CoverletMTPSettings
   public bool DeterministicReport { get; set; }
   public string ExcludeAssembliesWithoutSources { get; set; } = "MissingAll";
   public bool DisableManagedInstrumentationRestore { get; set; }
-
+  public int Threshold { get; set; }
+  internal ThresholdStatistic ThresholdStat { get; set; } = ThresholdStatistic.Minimum;
+  public List<string> ThresholdType { get; set; } = ["line"];
   public override string ToString()
   {
     var builder = new StringBuilder();
@@ -51,6 +54,9 @@ public class CoverletMTPSettings
     builder.AppendFormat("DoesNotReturnAttributes: '{0}', ", string.Join(",", DoesNotReturnAttributes));
     builder.AppendFormat("DeterministicReport: '{0}', ", DeterministicReport);
     builder.AppendFormat("ExcludeAssembliesWithoutSources: '{0}'", ExcludeAssembliesWithoutSources);
+    builder.AppendFormat("Threshold: '{0}', ", Threshold);
+    builder.AppendFormat("ThresholdStat: '{0}', ", ThresholdStat);
+    builder.AppendFormat("ThresholdType: '{0}'", string.Join(",", ThresholdType));
     return builder.ToString();
   }
 }

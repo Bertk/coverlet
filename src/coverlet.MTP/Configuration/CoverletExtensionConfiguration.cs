@@ -22,15 +22,15 @@ internal class CoverletExtensionConfiguration
   /// <summary>
   ///  Threshold for coverage percentage. If the coverage is below this threshold, the build will fail.
   /// </summary>
-  public int? threshold { get; set; }
+  public int? Threshold { get; set; }
 
   /// <summary>
   /// define which coverage statistic (Average|Minimum|Total) to use for threshold comparison. If not specified, the default is Total. If the coverage is below this threshold, the build will fail.
   /// </summary>
-  public ThresholdStatistic thresholdStat { get; set; }
+  public ThresholdStatistic ThresholdStat { get; set; }
 
   // Coverage type thresholds -  array of coverage types to apply the threshold to. If not specified, the default is line coverage. If the coverage is below this threshold, the build will fail.
-  public List<string> thresholdTypeFlagValues { get; set; } = ["line"];
+  public List<string> ThresholdType { get; set; } = ["line"];
 
   // Coverage parameters
   public string[]? IncludeFilters { get; set; }

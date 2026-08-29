@@ -276,6 +276,9 @@ public class CoverletMTPCommandLineTests
         CoverletOptionNames.SkipAutoProps,
         CoverletOptionNames.DoesNotReturnAttribute,
         CoverletOptionNames.ExcludeAssembliesWithoutSources,
+        CoverletOptionNames.Threshold,
+        CoverletOptionNames.ThresholdType,
+        CoverletOptionNames.ThresholdStat
      };
 
     Assert.Equal(expectedOptions.Length, options.Count);

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Coverlet.Core.Enums;
+
 namespace Coverlet.MTP.Configuration;
 
 /// <summary>
@@ -12,6 +14,10 @@ internal static class CoverletMTPConstants
   public const string DefaultReportFormat = "cobertura";
   public const string DefaultFileName = "coverage";
   public const string DefaultExcludeFilter = "[coverlet.*]*";
+
+  public const string DefaultThresholdType = "line";
+
+  public const ThresholdStatistic DefaultThresholdStat = ThresholdStatistic.Minimum;
   public const string ConfigFileName = "coverlet.mtp.appsettings.json";
 
   // Configuration keys for IConfiguration binding
@@ -33,5 +39,5 @@ internal static class CoverletMTPConstants
   public const string DisableManagedInstrumentationRestoreKey = "DisableManagedInstrumentationRestore";
   public const string ThresholdKey = "Threshold";
   public const string ThresholdStatKey = "ThresholdStat";
-  public const string ThresholdTypeFlagValuesKey = "ThresholdType";
+  public const string ThresholdTypeKey = "ThresholdType";
 }
