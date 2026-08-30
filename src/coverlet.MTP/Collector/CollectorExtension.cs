@@ -4,9 +4,11 @@
 #if NETSTANDARD2_0
 using System.Diagnostics;
 #endif
+using System.Globalization;
 using System.Text;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
+using Coverlet.Core.Enums;
 using Coverlet.Core.Helpers;
 using Coverlet.Core.Symbols;
 using Coverlet.MTP.CommandLine;
@@ -488,6 +490,117 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   }
 
   /// <summary>
+  /// Displays the configured coverage thresholds and their evaluation results.
+  /// </summary>
+  private async Task DisplayThresholdSummaryAsync(CoverageResult result, CancellationToken cancellation)
+  {
+    if (!_configuration.Threshold.HasValue)
+    {
+      return;
+    }
+
+    ThresholdStatistic thresholdStat = _configuration.ThresholdStat;
+    Dictionary<ThresholdTypeFlags, double> thresholdValues = BuildThresholdValues(
+      _configuration.ThresholdType,
+      _configuration.Threshold.Value);
+    ThresholdTypeFlags belowThreshold = result.GetThresholdTypesBelowThreshold(thresholdValues, thresholdStat);
+
+    var summary = new StringBuilder();
+    summary.AppendLine();
+    summary.AppendLine("  Coverage Threshold Results:");
+    foreach (KeyValuePair<ThresholdTypeFlags, double> thresholdValue in thresholdValues)
+    {
+      ThresholdTypeFlags type = thresholdValue.Key;
+      double threshold = thresholdValue.Value;
+      double coverage = GetThresholdCoverage(result, type, thresholdStat);
+      string comparison = (belowThreshold & type) == ThresholdTypeFlags.None ? ">=" : "<";
+      summary.AppendLine(
+        $"    {thresholdStat} - {type} ({GetThresholdScopeDescription(thresholdStat)}): " +
+        $"{coverage.ToString("F1", CultureInfo.InvariantCulture)}% {comparison} " +
+        $"{threshold.ToString("F1", CultureInfo.InvariantCulture)}% threshold");
+    }
+
+    if (belowThreshold != ThresholdTypeFlags.None)
+    {
+      summary.AppendLine();
+      foreach (KeyValuePair<ThresholdTypeFlags, double> thresholdValue in thresholdValues.Where(pair => (belowThreshold & pair.Key) != ThresholdTypeFlags.None))
+      {
+        ThresholdTypeFlags type = thresholdValue.Key;
+        double threshold = thresholdValue.Value;
+        summary.AppendLine(
+          $"    The {thresholdStat.ToString().ToLowerInvariant()} {type.ToString().ToLowerInvariant()} coverage is below the specified " +
+          $"{threshold.ToString("F1", CultureInfo.InvariantCulture)}% threshold.");
+      }
+    }
+
+    await _outputDisplay.DisplayAsync(
+      this,
+      new TextOutputDeviceData(summary.ToString()),
+      cancellation).ConfigureAwait(false);
+  }
+
+  private static Dictionary<ThresholdTypeFlags, double> BuildThresholdValues(IEnumerable<string> thresholdTypes, double threshold)
+  {
+    var values = new Dictionary<ThresholdTypeFlags, double>();
+    foreach (string thresholdType in thresholdTypes)
+    {
+      values[ParseThresholdType(thresholdType)] = threshold;
+    }
+
+    return values;
+  }
+
+  private static ThresholdTypeFlags ParseThresholdType(string thresholdType) =>
+    thresholdType.Trim().ToLowerInvariant() switch
+    {
+      "line" => ThresholdTypeFlags.Line,
+      "branch" => ThresholdTypeFlags.Branch,
+      "method" => ThresholdTypeFlags.Method,
+      _ => throw new InvalidOperationException($"Invalid threshold type '{thresholdType}'. Valid values are line, branch, and method.")
+    };
+
+  private static double GetThresholdCoverage(CoverageResult result, ThresholdTypeFlags thresholdType, ThresholdStatistic thresholdStat)
+  {
+    if (thresholdStat == ThresholdStatistic.Minimum)
+    {
+      return result.Modules.Values
+        .Select(module => GetCoveragePercent(module, thresholdType))
+        .DefaultIfEmpty(0)
+        .Min();
+    }
+
+    CoverageDetails coverage = thresholdType switch
+    {
+      ThresholdTypeFlags.Line => CoverageSummary.CalculateLineCoverage(result.Modules),
+      ThresholdTypeFlags.Branch => CoverageSummary.CalculateBranchCoverage(result.Modules),
+      ThresholdTypeFlags.Method => CoverageSummary.CalculateMethodCoverage(result.Modules),
+      _ => throw new ArgumentOutOfRangeException(nameof(thresholdType), thresholdType, "A single coverage threshold type is required.")
+    };
+
+    return thresholdStat == ThresholdStatistic.Average
+      ? coverage.AverageModulePercent
+      : coverage.Percent;
+  }
+
+  private static double GetCoveragePercent(Documents module, ThresholdTypeFlags thresholdType) =>
+    thresholdType switch
+    {
+      ThresholdTypeFlags.Line => CoverageSummary.CalculateLineCoverage(module).Percent,
+      ThresholdTypeFlags.Branch => CoverageSummary.CalculateBranchCoverage(module).Percent,
+      ThresholdTypeFlags.Method => CoverageSummary.CalculateMethodCoverage(module).Percent,
+      _ => throw new ArgumentOutOfRangeException(nameof(thresholdType), thresholdType, "A single coverage threshold type is required.")
+    };
+
+  private static string GetThresholdScopeDescription(ThresholdStatistic thresholdStat) =>
+    thresholdStat switch
+    {
+      ThresholdStatistic.Total => "Total over Module",
+      ThresholdStatistic.Average => "Average per Module",
+      ThresholdStatistic.Minimum => "Minimum per Module",
+      _ => throw new ArgumentOutOfRangeException(nameof(thresholdStat), thresholdStat, null)
+    };
+
+  /// <summary>
   /// Displays generated report paths to output device.
   /// </summary>
   private async Task DisplayGeneratedReportsAsync(List<string> generatedReports, CancellationToken cancellation)
@@ -546,13 +659,30 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     // Display results
     await DisplayGeneratedReportsAsync(generatedReports, cancellation);
 
-    // Display coverage summary table after the file artifacts list
+    // Display code coverage summary table after the file artifacts list
     await DisplayCoverageSummaryAsync(result, cancellation);
 
     // Display console-type report output (e.g. teamcity) directly to the output device
     await DisplayConsoleReportOutputsAsync(consoleOutputs, cancellation);
-  }
 
+    // Display threshold metric summary table after the file artifacts list
+    await DisplayThresholdSummaryAsync(result, cancellation);
+
+    // Exitcode `CoverageThresholdFailed = 14` shall be set if any threshold is not met
+    if (_configuration.Threshold.HasValue)
+    {
+      ThresholdStatistic thresholdStat = _configuration.ThresholdStat;
+      Dictionary<ThresholdTypeFlags, double> thresholdValues = BuildThresholdValues(
+        _configuration.ThresholdType,
+        _configuration.Threshold.Value);
+      ThresholdTypeFlags belowThreshold = result.GetThresholdTypesBelowThreshold(thresholdValues, thresholdStat);
+      if (belowThreshold != ThresholdTypeFlags.None)
+      {
+        _logger.LogError("Coverage thresholds not met. Setting exit code for Microsoft Testing Framework to 14.");
+        Environment.ExitCode = 14;
+      }
+    }
+  }
   private string GetHitsFilePath()
   {
     // The hits file is in the same directory as the instrumented module
