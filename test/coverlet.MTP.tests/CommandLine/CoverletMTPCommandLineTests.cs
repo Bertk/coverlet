@@ -3,6 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
 using Xunit;
 
@@ -50,6 +51,52 @@ public class CoverletMTPCommandLineTests
 
     Assert.True(result.IsValid);
     Assert.True(string.IsNullOrEmpty(result.ErrorMessage));
+  }
+
+  [Theory]
+  [InlineData(CoverletOptionNames.Threshold, "0")]
+  [InlineData(CoverletOptionNames.Threshold, "70")]
+  [InlineData(CoverletOptionNames.Threshold, "100")]
+  [InlineData(CoverletOptionNames.ThresholdStat, "minimum")]
+  [InlineData(CoverletOptionNames.ThresholdStat, "average")]
+  [InlineData(CoverletOptionNames.ThresholdStat, "total")]
+  [InlineData(CoverletOptionNames.ThresholdType, "line")]
+  [InlineData(CoverletOptionNames.ThresholdType, "branch")]
+  [InlineData(CoverletOptionNames.ThresholdType, "method")]
+  public async Task IsValidWhenThresholdOptionHasValidValue(string optionName, string value)
+  {
+    CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
+
+    ValidationResult result = await _provider.ValidateOptionArgumentsAsync(option, [value]);
+
+    Assert.True(result.IsValid);
+  }
+
+  [Theory]
+  [InlineData(CoverletOptionNames.Threshold, "-1")]
+  [InlineData(CoverletOptionNames.Threshold, "101")]
+  [InlineData(CoverletOptionNames.Threshold, "70.5")]
+  [InlineData(CoverletOptionNames.ThresholdStat, "totalish")]
+  [InlineData(CoverletOptionNames.ThresholdType, "outline")]
+  [InlineData(CoverletOptionNames.ThresholdType, "line,unknown")]
+  public async Task IsInvalidWhenThresholdOptionHasInvalidValue(string optionName, string value)
+  {
+    CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == optionName);
+
+    ValidationResult result = await _provider.ValidateOptionArgumentsAsync(option, [value]);
+
+    Assert.False(result.IsValid);
+    Assert.False(string.IsNullOrEmpty(result.ErrorMessage));
+  }
+
+  [Fact]
+  public async Task IsValidWhenThresholdTypeHasMultipleValues()
+  {
+    CommandLineOption option = _provider.GetCommandLineOptions().First(x => x.Name == CoverletOptionNames.ThresholdType);
+
+    ValidationResult result = await _provider.ValidateOptionArgumentsAsync(option, ["line,branch", "method"]);
+
+    Assert.True(result.IsValid);
   }
 
   [Theory]

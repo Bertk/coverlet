@@ -25,6 +25,26 @@ internal sealed class CoverletExtensionCommandLineProvider : ICommandLineOptions
   public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     => CoverletCommandLineOptionDefinitions.GetAllOptions();
 
+#if NETSTANDARD2_0
+  private static bool TryParseEnum(Type enumType, string value, bool ignoreCase, out object? result)
+  {
+    try
+    {
+      result = Enum.Parse(enumType, value, ignoreCase);
+      return Enum.IsDefined(enumType, result);
+    }
+    catch (ArgumentException)
+    {
+      result = null;
+      return false;
+    }
+  }
+#else
+  private static bool TryParseEnum(Type enumType, string value, bool ignoreCase, out object? result)
+  {
+    return Enum.TryParse(enumType, value, ignoreCase, out result) && Enum.IsDefined(enumType, result);
+  }
+#endif
   public Task<ValidationResult> ValidateOptionArgumentsAsync(CommandLineOption commandOption, string[] arguments)
   {
     if (commandOption.Name == CoverletOptionNames.Formats)
@@ -92,17 +112,9 @@ internal sealed class CoverletExtensionCommandLineProvider : ICommandLineOptions
     // Validate ThresholdType option to ensure it has a valid value.
     if (commandOption.Name == CoverletOptionNames.ThresholdType)
     {
-      if (arguments.Length == 0)
+      if (arguments.Length == 0 || arguments.SelectMany(value => value.Split(',')).Any(value => !IsThresholdType(value)))
       {
-        return Task.FromResult(ValidationResult.Invalid($"At least one value must be specified for '{commandOption.Name}'."));
-      }
-      if (arguments.Length > 1)
-      {
-        return Task.FromResult(ValidationResult.Invalid($"Only one value is allowed for '{commandOption.Name}'."));
-      }
-      if (!arguments[0].Contains("line") && !arguments[0].Contains("branch") && !arguments[0].Contains("method"))
-      {
-        return Task.FromResult(ValidationResult.Invalid($"The value '{arguments[0]}' is not a valid option for '{commandOption.Name}' (line, branch, method)."));
+        return Task.FromResult(ValidationResult.Invalid($"The value for '{commandOption.Name}' must be line, branch, or method."));
       }
     }
 
@@ -117,13 +129,19 @@ internal sealed class CoverletExtensionCommandLineProvider : ICommandLineOptions
       {
         return Task.FromResult(ValidationResult.Invalid($"Only one value is allowed for '{commandOption.Name}'."));
       }
-      if (!arguments[0].Contains("total") && !arguments[0].Contains("average") && !arguments[0].Contains("minimum"))
+
+      if (!TryParseEnum(typeof(Coverlet.Core.Enums.ThresholdStatistic), arguments[0], ignoreCase: true, out object? thresholdStatistic))
       {
         return Task.FromResult(ValidationResult.Invalid($"The value '{arguments[0]}' is not a valid option for '{commandOption.Name}'(total, average, minimum)."));
       }
     }
     return ValidationResult.ValidTask;
   }
+
+  private static bool IsThresholdType(string value) =>
+    value.Trim().Equals("line", StringComparison.OrdinalIgnoreCase) ||
+    value.Trim().Equals("branch", StringComparison.OrdinalIgnoreCase) ||
+    value.Trim().Equals("method", StringComparison.OrdinalIgnoreCase);
 
   /// <summary>
   /// Validates that the file prefix is a safe filename segment without path traversal risks.
@@ -166,4 +184,3 @@ internal sealed class CoverletExtensionCommandLineProvider : ICommandLineOptions
     return ValidationResult.ValidTask;
   }
 }
-

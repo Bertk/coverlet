@@ -46,6 +46,7 @@ internal class CoverletMTPSettingsParser
     settings.ExcludeAssembliesWithoutSources = section[CoverletMTPConstants.ExcludeAssembliesWithoutSourcesKey] ?? "MissingAll";
     settings.DisableManagedInstrumentationRestore = ParseBoolValue(section, CoverletMTPConstants.DisableManagedInstrumentationRestoreKey);
     settings.ReportFormats = ParseReportFormats(section);
+    settings.Threshold = ParseThreshold(section);
     settings.ThresholdStat = ParseThresholdStat(section);
     settings.ThresholdType = ParseThresholdType(section);
 
@@ -101,6 +102,9 @@ internal class CoverletMTPSettingsParser
         .Select(v => v.Trim())
         .Where(v => !string.IsNullOrWhiteSpace(v))];
   }
+
+  private static int? ParseThreshold(IConfigurationSection section) =>
+    int.TryParse(section[CoverletMTPConstants.ThresholdKey], out int threshold) ? threshold : null;
 
   private static bool ParseBoolValue(IConfigurationSection section, string key)
   {

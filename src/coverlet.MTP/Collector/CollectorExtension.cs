@@ -139,6 +139,9 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       _configuration.SkipAutoProps = config.SkipAutoProps;
       _configuration.formats = config.GetOutputFormats();
       _configuration.FilePrefix = config.GetFilePrefix();
+      _configuration.Threshold = config.GetThreshold();
+      _configuration.ThresholdStat = config.GetThresholdStatistic();
+      _configuration.ThresholdType = config.GetThresholdTypes();
       _configuration.UseSourceLink = false;
 
       _logger.LogVerbose($"Test module path: {_testModulePath}");

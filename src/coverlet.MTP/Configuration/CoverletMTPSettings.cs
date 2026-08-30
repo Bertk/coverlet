@@ -34,7 +34,7 @@ public class CoverletMTPSettings
   public bool DeterministicReport { get; set; }
   public string ExcludeAssembliesWithoutSources { get; set; } = "MissingAll";
   public bool DisableManagedInstrumentationRestore { get; set; }
-  public int Threshold { get; set; }
+  public int? Threshold { get; set; }
   internal ThresholdStatistic ThresholdStat { get; set; } = ThresholdStatistic.Minimum;
   public List<string> ThresholdType { get; set; } = ["line"];
   public override string ToString()
