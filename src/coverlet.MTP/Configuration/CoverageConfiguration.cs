@@ -308,12 +308,15 @@ internal sealed class CoverageConfiguration
 
   public int? GetThreshold()
   {
-    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Threshold, out string[]? values))
+    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Threshold, out string[]? values) &&
+    values.Length > 0 &&
+    int.TryParse(values[0], out int threshold) &&
+    threshold is >= 0 and <= 100)
     {
-      return int.Parse(values[0]);
+      return threshold;
     }
 
-    return _configFileSettings?.Threshold;
+    return _configFileSettings?.Threshold is >= 0 and <= 100 ? _configFileSettings.Threshold : null;
   }
 
   public ThresholdStatistic GetThresholdStatistic()

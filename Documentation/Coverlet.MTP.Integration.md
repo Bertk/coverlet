@@ -87,9 +87,9 @@ dotnet exec <test-assembly.dll> --help
 | `--coverlet-skip-auto-props` | Skip auto-implemented properties. (default: `false`) |
 | `--coverlet-does-not-return-attribute <attribute>` | Attributes that mark methods as not returning. Can be specified multiple times. (default: `none`) |
 | `--coverlet-exclude-assemblies-without-sources <value>` | Exclude assemblies without source code. Values: `MissingAll`, `MissingAny`, `None`. (default: `None`) |
-| `--threshold <threshold>` | Exits with error if the coverage % is below value |
-| `--threshold-type <branch\line\|method>` | Coverage type to apply the threshold to. [default: `line`, `branch`, `method`] |
-| `--threshold-stat <Average\|Minimum\|Total>` | Coverage statistic used to enforce the threshold value. [default: Minimum] |
+| `--coverlet-threshold <threshold>` | Exits with error if the coverage % is below value |
+| `--coverlet-threshold-type <branch\line\|method>` | Coverage type to apply the threshold to. [default: `line`, `branch`, `method`] |
+| `--coverlet-threshold-stat <Average\|Minimum\|Total>` | Coverage statistic used to enforce the threshold value. [default: Minimum] |
 
 > [!TIP]
 > If you encounter instrumentation failures like "The process cannot access the file ... because it is being used by another process", try setting `--coverlet-exclude-assemblies-without-sources MissingAll` (or in a config file: `"ExcludeAssembliesWithoutSources": "MissingAll"`) to skip assemblies without sources and reduce access conflicts.
@@ -240,8 +240,8 @@ The legacy `coverlet.mtp.appsettings.json` format is still supported for backwar
 | `DeterministicReport` | bool | Generate deterministic reports |
 | `ExcludeAssembliesWithoutSources` | string | Values: `MissingAll`, `MissingAny`, `None` (default: `MissingAll`) |
 | `Threshold` | int | Exits with error if the code coverage [0..100%]  is below value |
-| `ThresholdType` | string | Comma-separated coverage type to apply the Threshold to. [default: `line`, `branch`, `method`] |
-| `ThresholdStat` | string | Coverage statistic used to enforce the threshold value. [default: `Minimum`, `Average`, `Total`] |
+| `ThresholdType` | string | Comma-separated coverage type to apply the Threshold to. [default: `line`] |
+| `ThresholdStat` | string | Coverage statistic used to enforce the threshold value. Values: `Minimum`, `Average`, `Total`. (default: `Minimum`) |
 
 **Example `coverlet.mtp.appsettings.json`:**
 

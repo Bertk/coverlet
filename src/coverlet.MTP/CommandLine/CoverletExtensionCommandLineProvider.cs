@@ -132,7 +132,7 @@ internal sealed class CoverletExtensionCommandLineProvider : ICommandLineOptions
 
       if (!TryParseEnum(typeof(Coverlet.Core.Enums.ThresholdStatistic), arguments[0], ignoreCase: true, out object? thresholdStatistic))
       {
-        return Task.FromResult(ValidationResult.Invalid($"The value '{arguments[0]}' is not a valid option for '{commandOption.Name}'(total, average, minimum)."));
+        return Task.FromResult(ValidationResult.Invalid($"The value '{arguments[0]}' is not a valid option for '{commandOption.Name}' (total, average, minimum)."));
       }
     }
     return ValidationResult.ValidTask;

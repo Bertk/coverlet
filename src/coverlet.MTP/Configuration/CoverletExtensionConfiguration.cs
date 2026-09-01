@@ -25,7 +25,7 @@ internal class CoverletExtensionConfiguration
   public int? Threshold { get; set; }
 
   /// <summary>
-  /// define which coverage statistic (Average|Minimum|Total) to use for threshold comparison. If not specified, the default is Total. If the coverage is below this threshold, the build will fail.
+  /// define which coverage statistic (Average|Minimum|Total) to use for threshold comparison. If not specified, the default is Minimum. If the coverage is below this threshold, the build will fail.
   /// </summary>
   public ThresholdStatistic ThresholdStat { get; set; }
 

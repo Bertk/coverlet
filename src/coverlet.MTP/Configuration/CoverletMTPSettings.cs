@@ -53,7 +53,7 @@ public class CoverletMTPSettings
     builder.AppendFormat("SkipAutoProps: '{0}', ", SkipAutoProps);
     builder.AppendFormat("DoesNotReturnAttributes: '{0}', ", string.Join(",", DoesNotReturnAttributes));
     builder.AppendFormat("DeterministicReport: '{0}', ", DeterministicReport);
-    builder.AppendFormat("ExcludeAssembliesWithoutSources: '{0}'", ExcludeAssembliesWithoutSources);
+    builder.AppendFormat("ExcludeAssembliesWithoutSources: '{0}', ", ExcludeAssembliesWithoutSources);
     builder.AppendFormat("Threshold: '{0}', ", Threshold);
     builder.AppendFormat("ThresholdStat: '{0}', ", ThresholdStat);
     builder.AppendFormat("ThresholdType: '{0}'", string.Join(",", ThresholdType));

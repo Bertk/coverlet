@@ -68,8 +68,9 @@ internal class CoverletMTPSettingsParser
 
   private static List<string> ParseThresholdType(IConfigurationSection section)
   {
-    List<string> types = [];
-    types.AddRange(ParseArrayValue(section, CoverletMTPConstants.ThresholdTypeKey));
+    List<string> types = [.. ParseArrayValue(section, CoverletMTPConstants.ThresholdTypeKey)
+       .Select(t => t.Trim().ToLowerInvariant())
+       .Where(t => t is "line" or "branch" or "method")];
     return types.Count == 0 ? [CoverletMTPConstants.DefaultThresholdType] : types;
   }
 
@@ -104,7 +105,9 @@ internal class CoverletMTPSettingsParser
   }
 
   private static int? ParseThreshold(IConfigurationSection section) =>
-    int.TryParse(section[CoverletMTPConstants.ThresholdKey], out int threshold) ? threshold : null;
+         int.TryParse(section[CoverletMTPConstants.ThresholdKey], out int threshold) && threshold is >= 0 and <= 100
+       ? threshold
+       : null;
 
   private static bool ParseBoolValue(IConfigurationSection section, string key)
   {
