@@ -12,18 +12,20 @@ namespace Coverlet.MTP.Collector.Tests;
 public class CoverletCoverageDataProducerTests
 {
   [Fact]
-  public void CreateCoverageMessagesCreatesOverallAndModuleMessagesForLineAndBranch()
+  public void CreateCoverageMessagesCreatesOverallAndModuleMessagesForLineBranchMethod()
   {
     var producer = new CoverletCoverageDataProducer();
     CoverageResult result = CreateCoverageResult(hits: 1);
 
     IReadOnlyList<TestCoverageMessage> messages = producer.CreateCoverageMessages(result, new SessionUid("session"));
 
-    Assert.Equal(4, messages.Count);
+    Assert.Equal(6, messages.Count);
     Assert.Contains(messages, message => message.Scope.Level == CoverageScopeLevel.Overall && message.Metric == CoverageMetric.Line);
     Assert.Contains(messages, message => message.Scope.Level == CoverageScopeLevel.Overall && message.Metric == CoverageMetric.Branch);
+    Assert.Contains(messages, message => message.Scope.Level == CoverageScopeLevel.Overall && message.Metric == CoverageMetric.Method);
     Assert.Contains(messages, message => message.Scope.Level == CoverageScopeLevel.Module && message.Metric == CoverageMetric.Line);
     Assert.Contains(messages, message => message.Scope.Level == CoverageScopeLevel.Module && message.Metric == CoverageMetric.Branch);
+    Assert.Contains(messages, message => message.Scope.Level == CoverageScopeLevel.Module && message.Metric == CoverageMetric.Method);
   }
 
   [Fact]
