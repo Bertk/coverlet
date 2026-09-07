@@ -42,18 +42,26 @@ internal sealed class CoverletCoverageDataProducer : IDataProducer
 
     var messages = new List<TestCoverageMessage>();
 
+    // Calculate overall coverage for all metrics (line, branch, method)
+    // regardless of ThresholdType configuration. ThresholdType is only for
+    // determining which metrics to enforce thresholds on, not what metrics to calculate.
     CoverageDetails overallLine = CoverageSummary.CalculateLineCoverage(result.Modules);
     CoverageDetails overallBranch = CoverageSummary.CalculateBranchCoverage(result.Modules);
+    CoverageDetails overallMethod = CoverageSummary.CalculateMethodCoverage(result.Modules);
     messages.Add(CreateCoverageMessage(sessionUid, CoverageScope.Overall, CoverageMetric.Line, overallLine));
     messages.Add(CreateCoverageMessage(sessionUid, CoverageScope.Overall, CoverageMetric.Branch, overallBranch));
+    messages.Add(CreateCoverageMessage(sessionUid, CoverageScope.Overall, CoverageMetric.Method, overallMethod));
 
+    // Calculate per-module coverage for all metrics
     foreach (KeyValuePair<string, Documents> module in result.Modules)
     {
       var scope = new CoverageScope(CoverageScopeLevel.Module, module.Key);
       CoverageDetails line = CoverageSummary.CalculateLineCoverage(module.Value);
       CoverageDetails branch = CoverageSummary.CalculateBranchCoverage(module.Value);
+      CoverageDetails method = CoverageSummary.CalculateMethodCoverage(module.Value);
       messages.Add(CreateCoverageMessage(sessionUid, scope, CoverageMetric.Line, line));
       messages.Add(CreateCoverageMessage(sessionUid, scope, CoverageMetric.Branch, branch));
+      messages.Add(CreateCoverageMessage(sessionUid, scope, CoverageMetric.Method, method));
     }
 
     return messages;
