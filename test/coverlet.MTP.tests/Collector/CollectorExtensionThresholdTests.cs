@@ -7,8 +7,10 @@ using Coverlet.Core.Enums;
 using Coverlet.MTP.Configuration;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.OutputDevice;
 using Moq;
 using Xunit;
@@ -18,44 +20,44 @@ namespace Coverlet.MTP.Collector.Tests;
 public class CollectorExtensionThresholdTests
 {
   [Fact]
-  public async Task DisplayThresholdSummaryAsyncDisplaysConfiguredPassingMetrics()
+  public async Task PublishCoverageDataAsyncPublishesPassingThresholdMetrics()
   {
     var outputDevice = new Mock<IOutputDevice>();
-    CollectorExtension collector = CreateCollector(outputDevice);
+    var messageBus = new Mock<IMessageBus>();
+    CollectorExtension collector = CreateCollector(outputDevice, messageBus);
     ConfigureThreshold(collector, 70, ThresholdStatistic.Total, ["line", "branch", "method"]);
 
-    await DisplayThresholdSummaryAsync(collector, CreateCoverageResult(hits: 1));
+    await PublishCoverageDataAsync(collector, CreateCoverageResult(hits: 1));
 
-    outputDevice.Verify(x => x.DisplayAsync(
-      It.Is<IOutputDeviceDataProducer>(producer => producer == collector),
-      It.Is<TextOutputDeviceData>(data =>
-        data.Text.Contains("Coverage Threshold Results:") &&
-        data.Text.Contains("Total - Line (Total over Module): 100.0% >= 70.0% threshold") &&
-        data.Text.Contains("Total - Branch (Total over Module): 100.0% >= 70.0% threshold") &&
-        data.Text.Contains("Total - Method (Total over Module): 100.0% >= 70.0% threshold")),
-      It.IsAny<CancellationToken>()),
-      Times.Once);
+    messageBus.Verify(x => x.PublishAsync(
+      It.IsAny<IDataProducer>(),
+      It.Is<IData>(data => data is TestCoverageThresholdMessage
+        && ((TestCoverageThresholdMessage)data).Metric == CoverageMetric.Line
+        && ((TestCoverageThresholdMessage)data).RequiredPercentage == 70
+        && ((TestCoverageThresholdMessage)data).ActualPercentage == 100
+        && ((TestCoverageThresholdMessage)data).Passed)), Times.Once);
   }
 
   [Fact]
-  public async Task DisplayThresholdSummaryAsyncDisplaysFailedMetric()
+  public async Task PublishCoverageDataAsyncPublishesFailedThresholdMetric()
   {
     var outputDevice = new Mock<IOutputDevice>();
-    CollectorExtension collector = CreateCollector(outputDevice);
+    var messageBus = new Mock<IMessageBus>();
+    CollectorExtension collector = CreateCollector(outputDevice, messageBus);
     ConfigureThreshold(collector, 70, ThresholdStatistic.Total, ["line"]);
 
-    await DisplayThresholdSummaryAsync(collector, CreateCoverageResult(hits: 0));
+    await PublishCoverageDataAsync(collector, CreateCoverageResult(hits: 0));
 
-    outputDevice.Verify(x => x.DisplayAsync(
-      It.IsAny<IOutputDeviceDataProducer>(),
-      It.Is<TextOutputDeviceData>(data =>
-        data.Text.Contains("Total - Line (Total over Module): 0.0% < 70.0% threshold") &&
-        data.Text.Contains("The total line coverage is below the specified 70.0% threshold.")),
-      It.IsAny<CancellationToken>()),
-      Times.Once);
+    messageBus.Verify(x => x.PublishAsync(
+      It.IsAny<IDataProducer>(),
+      It.Is<IData>(data => data is TestCoverageThresholdMessage
+        && ((TestCoverageThresholdMessage)data).Metric == CoverageMetric.Line
+        && ((TestCoverageThresholdMessage)data).RequiredPercentage == 70
+        && ((TestCoverageThresholdMessage)data).ActualPercentage == 0
+        && !((TestCoverageThresholdMessage)data).Passed)), Times.Once);
   }
 
-  private static CollectorExtension CreateCollector(Mock<IOutputDevice> outputDevice)
+  private static CollectorExtension CreateCollector(Mock<IOutputDevice> outputDevice, Mock<IMessageBus> messageBus)
   {
     var loggerFactory = new Mock<ILoggerFactory>();
     loggerFactory.Setup(factory => factory.CreateLogger(It.IsAny<string>()))
@@ -64,17 +66,20 @@ public class CollectorExtensionThresholdTests
     var commandLineOptions = new Mock<ICommandLineOptions>();
     var configuration = new Mock<IConfiguration>();
     var fileSystem = new Mock<IFileSystem>();
+
     outputDevice.Setup(device => device.DisplayAsync(
       It.IsAny<IOutputDeviceDataProducer>(),
       It.IsAny<IOutputDeviceData>(),
       It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+    messageBus.Setup(bus => bus.PublishAsync(It.IsAny<IDataProducer>(), It.IsAny<IData>())).Returns(Task.CompletedTask);
 
     return new CollectorExtension(
       loggerFactory.Object,
       commandLineOptions.Object,
       outputDevice.Object,
       configuration.Object,
-      fileSystem.Object);
+      fileSystem.Object,
+      messageBus: messageBus.Object);
   }
 
   private static void ConfigureThreshold(CollectorExtension collector, int threshold, ThresholdStatistic thresholdStat, List<string> thresholdTypes)
@@ -87,11 +92,11 @@ public class CollectorExtensionThresholdTests
     configuration.ThresholdType = thresholdTypes;
   }
 
-  private static async Task DisplayThresholdSummaryAsync(CollectorExtension collector, CoverageResult result)
+  private static async Task PublishCoverageDataAsync(CollectorExtension collector, CoverageResult result)
   {
     System.Reflection.MethodInfo method = typeof(CollectorExtension)
-      .GetMethod("DisplayThresholdSummaryAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
-    await (Task)method.Invoke(collector, [result, CancellationToken.None])!;
+      .GetMethod("PublishCoverageDataAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+    await (Task)method.Invoke(collector, [result, new List<string>(), CancellationToken.None])!;
   }
 
   private static CoverageResult CreateCoverageResult(int hits)

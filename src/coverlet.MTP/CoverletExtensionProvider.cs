@@ -36,7 +36,8 @@ public static class CoverletExtensionProvider
               serviceProvider.GetLoggerFactory(),
               serviceProvider.GetCommandLineOptions(),
               serviceProvider.GetOutputDevice(),
-              configuration) as ITestHostProcessLifetimeHandler;
+              configuration,
+              messageBus: serviceProvider.GetMessageBus()) as ITestHostProcessLifetimeHandler;
         });
 
     // ============================================================

@@ -4,7 +4,6 @@
 #if NETSTANDARD2_0
 using System.Diagnostics;
 #endif
-using System.Globalization;
 using System.Text;
 using Coverlet.Core;
 using Coverlet.Core.Abstractions;
@@ -20,9 +19,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Extensions.TestHostControllers;
+using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.OutputDevice;
+using Microsoft.Testing.Platform.TestHost;
 
 namespace Coverlet.MTP.Collector;
 
@@ -39,6 +41,8 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   private IServiceProvider? _serviceProvider;
   private readonly Microsoft.Testing.Platform.Configurations.IConfiguration? _platformConfiguration;
   private readonly Microsoft.Testing.Platform.OutputDevice.IOutputDevice _outputDisplay;
+  private readonly IMessageBus? _messageBus;
+  private readonly CoverletCoverageDataProducer _coverageDataProducer;
   private ICoverage? _coverage;
   private readonly Microsoft.Testing.Platform.Logging.ILoggerFactory _loggerFactory;
   private readonly Microsoft.Testing.Platform.CommandLine.ICommandLineOptions _commandLineOptions;
@@ -47,6 +51,8 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   private bool? _isCoverageEnabled;
 
   private bool IsCoverageEnabled => _isCoverageEnabled ??= _commandLineOptions.IsOptionSet(CoverletOptionNames.Coverage);
+
+  private static readonly char[] s_ignoredExitCodeSeparators = [',', ';'];
 
   private readonly CoverletExtension _extension = new();
   private readonly IReporterFactory _reporterFactory;
@@ -62,7 +68,9 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     Microsoft.Testing.Platform.OutputDevice.IOutputDevice? outputDevice,
     Microsoft.Testing.Platform.Configurations.IConfiguration? configuration,
     IFileSystem? fileSystem = null,
-    IReporterFactory? reporterFactory = null)
+    IReporterFactory? reporterFactory = null,
+    IMessageBus? messageBus = null,
+    CoverletCoverageDataProducer? coverageDataProducer = null)
   {
     _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
     _commandLineOptions = commandLineOptions ?? throw new ArgumentNullException(nameof(commandLineOptions));
@@ -70,6 +78,8 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     _outputDisplay = outputDevice ?? throw new ArgumentNullException(nameof(outputDevice));
     _fileSystem = fileSystem ?? new FileSystem();  // Use provided or create default
     _reporterFactory = reporterFactory ?? new DefaultReporterFactory();
+    _messageBus = messageBus;
+    _coverageDataProducer = coverageDataProducer ?? new CoverletCoverageDataProducer();
     _configuration = new CoverletExtensionConfiguration();
     _logger = new CoverletLoggerAdapter(_loggerFactory);
 
@@ -326,7 +336,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       _logger.LogVerbose($"Coverage result modules: {result.Modules?.Count ?? 0}");
 
       // Generate reports
-      await GenerateReportsAsync(result, cancellation);
+      await GenerateReportsAsync(result, testHostProcessInformation.ExitCode, cancellation);
 
       _logger.LogInformation("Code coverage collection completed");
     }
@@ -475,28 +485,39 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   }
 
   /// <summary>
-  /// Builds a coverage summary table string matching the format used by coverlet.msbuild and coverlet.console.
+  /// Publishes coverage metrics, threshold evaluations, and report references to the MTP message bus.
   /// </summary>
-  private static string BuildCoverageSummaryTable(CoverageResult result) =>
-    CoverageSummary.BuildCoverageSummaryTable(result.Modules);
-
-  /// <summary>
-  /// Displays the coverage summary table to the output device.
-  /// </summary>
-  private async Task DisplayCoverageSummaryAsync(CoverageResult result, CancellationToken cancellation)
+  private async Task PublishCoverageDataAsync(CoverageResult result, IReadOnlyList<string> generatedReports, CancellationToken cancellation)
   {
-    string table = BuildCoverageSummaryTable(result);
-    await _outputDisplay.DisplayAsync(
-      this,
-      new TextOutputDeviceData(Environment.NewLine + table),
-      cancellation).ConfigureAwait(false);
-  }
+    cancellation.ThrowIfCancellationRequested();
 
-  /// <summary>
-  /// Displays the configured coverage thresholds and their evaluation results.
-  /// </summary>
-  private async Task DisplayThresholdSummaryAsync(CoverageResult result, CancellationToken cancellation)
-  {
+    if (_messageBus is null)
+    {
+      _logger.LogVerbose("MTP message bus is unavailable. Skipping structured coverage data publishing.");
+      return;
+    }
+
+    SessionUid sessionUid = CreateSessionUid(result);
+
+    foreach (TestCoverageMessage coverageMessage in _coverageDataProducer.CreateCoverageMessages(result, sessionUid))
+    {
+      cancellation.ThrowIfCancellationRequested();
+      await _messageBus.PublishAsync(_coverageDataProducer, coverageMessage).ConfigureAwait(false);
+    }
+
+    foreach (string generatedReport in generatedReports)
+    {
+      cancellation.ThrowIfCancellationRequested();
+      string reportFormat = Path.GetExtension(generatedReport).TrimStart('.');
+      if (string.IsNullOrWhiteSpace(reportFormat))
+      {
+        continue;
+      }
+
+      TestCoverageReportMessage reportMessage = _coverageDataProducer.CreateReportMessage(sessionUid, generatedReport, reportFormat);
+      await _messageBus.PublishAsync(_coverageDataProducer, reportMessage).ConfigureAwait(false);
+    }
+
     if (!_configuration.Threshold.HasValue)
     {
       return;
@@ -508,38 +529,36 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       _configuration.Threshold.Value);
     ThresholdTypeFlags belowThreshold = result.GetThresholdTypesBelowThreshold(thresholdValues, thresholdStat);
 
-    var summary = new StringBuilder();
-    summary.AppendLine();
-    summary.AppendLine("  Coverage Threshold Results:");
-    foreach (KeyValuePair<ThresholdTypeFlags, double> thresholdValue in thresholdValues)
+    foreach (TestCoverageThresholdMessage thresholdMessage in _coverageDataProducer.CreateThresholdMessages(
+      result,
+      sessionUid,
+      thresholdValues,
+      thresholdStat,
+      GetThresholdCoverage,
+      belowThreshold))
     {
-      ThresholdTypeFlags type = thresholdValue.Key;
-      double threshold = thresholdValue.Value;
-      double coverage = GetThresholdCoverage(result, type, thresholdStat);
-      string comparison = (belowThreshold & type) == ThresholdTypeFlags.None ? ">=" : "<";
-      summary.AppendLine(
-        $"    {thresholdStat} - {type} ({GetThresholdScopeDescription(thresholdStat)}): " +
-        $"{coverage.ToString("F1", CultureInfo.InvariantCulture)}% {comparison} " +
-        $"{threshold.ToString("F1", CultureInfo.InvariantCulture)}% threshold");
+      cancellation.ThrowIfCancellationRequested();
+      await _messageBus.PublishAsync(_coverageDataProducer, thresholdMessage).ConfigureAwait(false);
+    }
+  }
+
+  private SessionUid CreateSessionUid(CoverageResult result)
+  {
+    string? coverageIdentifier = _coverageIdentifier;
+    if (!string.IsNullOrWhiteSpace(coverageIdentifier))
+    {
+      return new SessionUid(coverageIdentifier!);
     }
 
-    if (belowThreshold != ThresholdTypeFlags.None)
+    string? resultIdentifier = result.Identifier;
+    if (!string.IsNullOrWhiteSpace(resultIdentifier))
     {
-      summary.AppendLine();
-      foreach (KeyValuePair<ThresholdTypeFlags, double> thresholdValue in thresholdValues.Where(pair => (belowThreshold & pair.Key) != ThresholdTypeFlags.None))
-      {
-        ThresholdTypeFlags type = thresholdValue.Key;
-        double threshold = thresholdValue.Value;
-        summary.AppendLine(
-          $"    The {thresholdStat.ToString().ToLowerInvariant()} {type.ToString().ToLowerInvariant()} coverage is below the specified " +
-          $"{threshold.ToString("F1", CultureInfo.InvariantCulture)}% threshold.");
-      }
+      return new SessionUid(resultIdentifier!);
     }
 
-    await _outputDisplay.DisplayAsync(
-      this,
-      new TextOutputDeviceData(summary.ToString()),
-      cancellation).ConfigureAwait(false);
+    string fallbackIdentifier = Guid.NewGuid().ToString("N");
+    _logger.LogWarning("Coverage identifier is missing. Falling back to a generated session identifier.");
+    return new SessionUid(fallbackIdentifier);
   }
 
   private static Dictionary<ThresholdTypeFlags, double> BuildThresholdValues(IEnumerable<string> thresholdTypes, double threshold)
@@ -594,14 +613,29 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       _ => throw new ArgumentOutOfRangeException(nameof(thresholdType), thresholdType, "A single coverage threshold type is required.")
     };
 
-  private static string GetThresholdScopeDescription(ThresholdStatistic thresholdStat) =>
-    thresholdStat switch
+  private bool IsCoverageThresholdExitCodeIgnored()
+  {
+    const string ignoreExitCodeOption = "ignore-exit-code";
+
+    if (!_commandLineOptions.TryGetOptionArgumentList(ignoreExitCodeOption, out string[]? ignoredExitCodes) || ignoredExitCodes is null)
     {
-      ThresholdStatistic.Total => "Total over Module",
-      ThresholdStatistic.Average => "Average per Module",
-      ThresholdStatistic.Minimum => "Minimum per Module",
-      _ => throw new ArgumentOutOfRangeException(nameof(thresholdStat), thresholdStat, null)
-    };
+      return false;
+    }
+
+    foreach (string ignoredExitCode in ignoredExitCodes)
+    {
+      string[] values = ignoredExitCode.Split(s_ignoredExitCodeSeparators, StringSplitOptions.RemoveEmptyEntries);
+      foreach (string value in values)
+      {
+        if (string.Equals(value.Trim(), "14", StringComparison.Ordinal))
+        {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
 
   /// <summary>
   /// Displays generated report paths to output device.
@@ -634,7 +668,7 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
   }
 
   // Refactor GenerateReportsAsync to use extracted methods
-  private async Task GenerateReportsAsync(CoverageResult result, CancellationToken cancellation)
+  private async Task GenerateReportsAsync(CoverageResult result, int testHostExitCode, CancellationToken cancellation)
   {
     string outputDirectory = _platformConfiguration!.GetTestResultDirectory() ??
       Path.GetDirectoryName(_testModulePath) + Path.DirectorySeparatorChar;
@@ -662,16 +696,13 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
     // Display results
     await DisplayGeneratedReportsAsync(generatedReports, cancellation);
 
-    // Display code coverage summary table after the file artifacts list
-    await DisplayCoverageSummaryAsync(result, cancellation);
+    // Publish code coverage summary and threshold data to the MTP message bus.
+    await PublishCoverageDataAsync(result, generatedReports, cancellation);
 
     // Display console-type report output (e.g. teamcity) directly to the output device
     await DisplayConsoleReportOutputsAsync(consoleOutputs, cancellation);
 
-    // Display threshold metric summary table after the file artifacts list
-    await DisplayThresholdSummaryAsync(result, cancellation);
-
-    // Exitcode `CoverageThresholdFailed = 14` shall be set if any threshold is not met
+    // Exitcode `CoverageThresholdFailed = 14` shall only override otherwise successful test runs.
     if (_configuration.Threshold.HasValue)
     {
       ThresholdStatistic thresholdStat = _configuration.ThresholdStat;
@@ -681,8 +712,19 @@ internal sealed class CollectorExtension : ITestHostProcessLifetimeHandler, ITes
       ThresholdTypeFlags belowThreshold = result.GetThresholdTypesBelowThreshold(thresholdValues, thresholdStat);
       if (belowThreshold != ThresholdTypeFlags.None)
       {
-        _logger.LogError("Coverage thresholds not met. Setting exit code for Microsoft Testing Framework to 14.");
-        Environment.ExitCode = 14;
+        int currentExitCode = Environment.ExitCode != 0 ? Environment.ExitCode : testHostExitCode;
+        if (currentExitCode == 0)
+        {
+          if (IsCoverageThresholdExitCodeIgnored())
+          {
+            _logger.LogInformation("Coverage thresholds not met, but exit code 14 is ignored by --ignore-exit-code.");
+          }
+          else
+          {
+            _logger.LogError("Coverage thresholds not met. Setting exit code for Microsoft Testing Framework to 14.");
+            Environment.ExitCode = 14;
+          }
+        }
       }
     }
   }

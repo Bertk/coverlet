@@ -6,8 +6,10 @@ using Coverlet.Core.Abstractions;
 using Coverlet.MTP.CommandLine;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Configurations;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.OutputDevice;
 using Moq;
 using Xunit;
@@ -28,6 +30,7 @@ public class CollectorExtensionReportMethodsTests
   private readonly Mock<ICommandLineOptions> _mockCommandLineOptions;
   private readonly Mock<IConfiguration> _mockConfiguration;
   private readonly Mock<IOutputDevice> _mockOutputDevice;
+  private readonly Mock<IMessageBus> _mockMessageBus;
   private readonly Mock<IFileSystem> _mockFileSystem;
   private readonly Mock<ISourceRootTranslator> _mockSourceRootTranslator;
 
@@ -56,6 +59,7 @@ public class CollectorExtensionReportMethodsTests
     _mockConfiguration = new Mock<IConfiguration>();
     _mockFileSystem = new Mock<IFileSystem>();
     _mockOutputDevice = new Mock<IOutputDevice>();
+    _mockMessageBus = new Mock<IMessageBus>();
     _mockSourceRootTranslator = new Mock<ISourceRootTranslator>();
 
     _mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>()))
@@ -77,6 +81,10 @@ public class CollectorExtensionReportMethodsTests
     _mockConfiguration
       .Setup(x => x[It.IsAny<string>()])
       .Returns((string?)null);
+
+    _mockMessageBus
+      .Setup(x => x.PublishAsync(It.IsAny<IDataProducer>(), It.IsAny<IData>()))
+      .Returns(Task.CompletedTask);
 
     _mockFileSystem
       .Setup(x => x.Exists(s_simulatedTestModulePath))
@@ -138,7 +146,8 @@ public class CollectorExtensionReportMethodsTests
       _mockCommandLineOptions.Object,
       _mockOutputDevice.Object,
       _mockConfiguration.Object,
-      _mockFileSystem.Object);
+      _mockFileSystem.Object,
+      messageBus: _mockMessageBus.Object);
   }
 
   #region GenerateCoverageReportFiles Tests
@@ -538,35 +547,30 @@ public class CollectorExtensionReportMethodsTests
 
   #endregion
 
-  #region DisplayCoverageSummaryAsync Tests
+  #region PublishCoverageDataAsync Tests
 
   [Fact]
-  public async Task DisplayCoverageSummaryAsyncDisplaysCoverageTable()
+  public async Task PublishCoverageDataAsyncPublishesCoverageMessages()
   {
     // Arrange
     var collector = CreateCollectorWithCoverageEnabled();
     CoverageResult result = CreateTestCoverageResult();
 
-    _mockOutputDevice.Setup(x => x.DisplayAsync(
-      It.IsAny<IOutputDeviceDataProducer>(),
-      It.IsAny<IOutputDeviceData>(),
-      It.IsAny<CancellationToken>()))
-      .Returns(Task.CompletedTask);
-
     System.Reflection.MethodInfo? method = typeof(CollectorExtension)
-      .GetMethod("DisplayCoverageSummaryAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+      .GetMethod("PublishCoverageDataAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
     Assert.NotNull(method);
 
     // Act
-    await (Task)method.Invoke(collector, [result, CancellationToken.None])!;
+    await (Task)method.Invoke(collector, [result, new List<string>(), CancellationToken.None])!;
 
     // Assert
-    _mockOutputDevice.Verify(
-      x => x.DisplayAsync(
-        It.Is<IOutputDeviceDataProducer>(p => p == collector),
-        It.Is<TextOutputDeviceData>(data => data.Text.Contains("Module") && data.Text.Contains("Line") && data.Text.Contains("Method")),
-        It.IsAny<CancellationToken>()),
+    _mockMessageBus.Verify(
+      x => x.PublishAsync(
+        It.IsAny<IDataProducer>(),
+        It.Is<IData>(data => data is TestCoverageMessage
+          && ((TestCoverageMessage)data).Scope.Level == CoverageScopeLevel.Overall
+          && ((TestCoverageMessage)data).Metric == CoverageMetric.Line)),
       Times.Once);
   }
 

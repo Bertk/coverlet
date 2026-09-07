@@ -311,7 +311,7 @@ public class CollectCoverageTests : MtpValidationTestBase
   {
     // Arrange
     string testName = TestContext.Current.TestCase!.TestMethodName!;
-    using var testProject = CreateTestProject(testName, includeSimpleTest: true);
+    using var testProject = CreateTestProject(testName, includeSimpleTest: true, includeBranchTest: true);
     await BuildProject(testProject.SolutionPath);
 
     // Act
@@ -325,20 +325,21 @@ public class CollectCoverageTests : MtpValidationTestBase
     // Assert - test run succeeded
     Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
 
-    // Assert - module table header appears in output
-    Assert.True(result.StandardOutput.Contains("| Module"),
-      $"Expected coverage summary module table (| Module |) in standard output.\n\n{result.CombinedOutput}");
+    // Assert - MTP summary appears with module and aggregate rows
+    Assert.True(result.StandardOutput.Contains("Code Coverage Summary:"),
+      $"Expected code coverage summary in standard output.\n\n{result.CombinedOutput}");
 
-    // Assert - SUT module name appears in the table
-    Assert.True(result.StandardOutput.Contains("SampleLibrary"),
-      $"Expected SUT module 'SampleLibrary' in coverage summary table.\n\n{result.CombinedOutput}");
+    Assert.True(result.StandardOutput.Contains("SampleLibrary.dll - Branch:"),
+      $"Expected module branch coverage for SampleLibrary.dll in standard output.\n\n{result.CombinedOutput}");
 
-    // Assert - total/average summary table appears
-    Assert.True(result.StandardOutput.Contains("| Total"),
-      $"Expected '| Total' row in coverage summary table.\n\n{result.CombinedOutput}");
+    Assert.True(result.StandardOutput.Contains("Total - Branch:"),
+      $"Expected total branch coverage in standard output.\n\n{result.CombinedOutput}");
 
-    Assert.True(result.StandardOutput.Contains("| Average"),
-      $"Expected '| Average' row in coverage summary table.\n\n{result.CombinedOutput}");
+    Assert.False(result.StandardOutput.Contains("Total - Branch: N/A"),
+      $"Expected total branch coverage to be numeric, but it was N/A.\n\n{result.CombinedOutput}");
+
+    Assert.False(result.StandardOutput.Contains("SampleLibrary.dll - Branch: N/A"),
+      $"Expected module branch coverage to be numeric, but it was N/A.\n\n{result.CombinedOutput}");
   }
 
   [Fact]
