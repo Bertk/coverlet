@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <PackageReference Remove="Microsoft.CodeAnalysis.BannedApiAnalyzers" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="10.0.12" />
   </ItemGroup>
 
 </Project>
