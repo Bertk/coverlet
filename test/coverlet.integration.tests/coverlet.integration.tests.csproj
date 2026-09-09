@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks Condition="'$(LEGACY)' == ''">$(NetCurrent);net9.0;$(NetMinimum)</TargetFrameworks>
     <TargetFrameworks Condition="'$(LEGACY)' != ''">$(NetCurrent);$(NetMinimum)</TargetFrameworks>

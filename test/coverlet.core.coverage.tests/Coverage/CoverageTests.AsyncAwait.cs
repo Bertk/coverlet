@@ -1,4 +1,4 @@
-// Copyright (c) Toni Solarin-Sodara
+﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Coverlet.Core;
 using Coverlet.Core.CoverageSamples.Tests;
 using Coverlet.Core.Tests;
+using Coverlet.Core.Tests.Infrastructure;
 using Coverlet.Tests.Utils;
 using Xunit;
 
@@ -16,7 +17,7 @@ namespace Coverlet.CoreCoverage.Tests
 {
   public partial class CoverageTests
   {
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait()
     {
       string path = Path.GetTempFileName();
@@ -72,7 +73,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_Issue_669_1()
     {
       string path = Path.GetTempFileName();
@@ -102,7 +103,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_Issue_669_2()
     {
       string path = Path.GetTempFileName();
@@ -130,7 +131,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_Issue_1177()
     {
       string path = Path.GetTempFileName();
@@ -157,7 +158,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_Issue_1233()
     {
       string path = Path.GetTempFileName();
@@ -184,7 +185,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_Issue_1275()
     {
       string path = Path.GetTempFileName();
@@ -213,7 +214,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_Issue_1843_ComprehensiveInstrumentation()
     {
       // GOAL: Verify ALL async methods are instrumented and reported
@@ -320,7 +321,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_Issue_1843_VerifyAllMethodsDiscovered()
     {
       // This test verifies that the instrumentation process discovers
@@ -388,7 +389,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Theory]
+    [LinuxUnsupportedTheory]
     [InlineData(1)]
     [InlineData(5)]
     [InlineData(10)]
@@ -431,7 +432,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_Issue_1843_VerifyMetricsNotRegressed()
     {
       // This test ensures we don't regress on the coverage completeness
@@ -519,7 +520,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_Issue_1337_BasicTryFinally()
     {
       // Issue #1337: Coverlet flagged a branch for an async function's finally block where none exists.
@@ -554,7 +555,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_Issue_1337_TryFinallyWithException()
     {
       // Exercises the THROWING path of an async try-finally: the compiler emits
@@ -595,7 +596,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_TryFinallyWithReturn()
     {
       string path = Path.GetTempFileName();
@@ -628,7 +629,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_NestedTryFinally()
     {
       string path = Path.GetTempFileName();
@@ -667,7 +668,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_TryFinallyWithBranching()
     {
       string path = Path.GetTempFileName();
@@ -718,7 +719,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_TryCatchFinally()
     {
       string path = Path.GetTempFileName();
@@ -756,7 +757,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_AsyncTryFinallyPhantomBranches_EmptyTryAwaitFinally()
     {
       string path = Path.GetTempFileName();
@@ -795,7 +796,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_MultipleAwaitsInFinally()
     {
       string path = Path.GetTempFileName();
@@ -826,7 +827,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_Issue1337_TryCatchFinallyWithRealAsyncInFinally_NoPhantomBranches()
     {
       string path = Path.GetTempFileName();

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Coverlet.Core;
 using Coverlet.Core.CoverageSamples.Tests;
 using Coverlet.Core.Tests;
+using Coverlet.Core.Tests.Infrastructure;
 using Coverlet.Tests.Utils;
 using Xunit;
 
@@ -59,7 +60,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void SelectionStatements_IfWithoutElse_OnlyTrueBranch()
     {
       // Test for issue #1786 using the current sample shape with a shared return statement
@@ -202,7 +203,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void SelectionStatements_Switch_CSharp8_OneBranch()
     {
       string path = Path.GetTempFileName();

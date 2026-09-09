@@ -16,7 +16,7 @@ namespace Coverlet.CoreCoverage.Tests
   public partial class CoverageTests
   {
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void NoBranches_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -48,7 +48,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void If_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       Assert.SkipWhen(TestEnvironment.HasInteractiveStdin, TestEnvironment.InteractiveStdinSkipMessage);
@@ -80,7 +80,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void Switch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       Assert.SkipWhen(TestEnvironment.HasInteractiveStdin, TestEnvironment.InteractiveStdinSkipMessage);
@@ -112,7 +112,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void Subtle_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       Assert.SkipWhen(TestEnvironment.HasInteractiveStdin, TestEnvironment.InteractiveStdinSkipMessage);
@@ -144,7 +144,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void UnreachableBranch_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       Assert.SkipWhen(TestEnvironment.HasInteractiveStdin, TestEnvironment.InteractiveStdinSkipMessage);
@@ -176,7 +176,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void CallsGenericMethodDoesNotReturn_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -208,7 +208,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void CallsGenericClassDoesNotReturn_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -240,7 +240,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void WithLeave_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       string path = Path.GetTempFileName();
@@ -272,7 +272,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void FiltersAndFinally_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       //Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);
@@ -305,7 +305,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncCallsDoesNotReturn_DoesNotReturnAttribute_InstrumentsCorrect()
     {
       // Assert.SkipWhen(TestEnvironment.IsVisualStudio, TestEnvironment.VisualStudioSkipMessage);

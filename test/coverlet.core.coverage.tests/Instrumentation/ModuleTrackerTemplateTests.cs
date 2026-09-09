@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Coverlet.Core.Instrumentation;
+using Coverlet.Core.Tests.Infrastructure;
 using Xunit;
 
 namespace Coverlet.Core.Tests.Instrumentation
@@ -51,7 +52,7 @@ namespace Coverlet.Core.Tests.Instrumentation
   {
     private static readonly Task<int> s_success = Task.FromResult(0);
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void HitsFileCorrectlyWritten()
     {
       FunctionExecutor.Run(() =>
@@ -67,7 +68,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       });
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void HitsFileWithDifferentNumberOfEntriesCausesExceptionOnUnload()
     {
       FunctionExecutor.Run(() =>
@@ -80,7 +81,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       });
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void HitsOnMultipleThreadsCorrectlyCounted()
     {
       FunctionExecutor.Run(() =>
@@ -117,7 +118,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       });
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void MultipleSequentialUnloadsHaveCorrectTotalData()
     {
       FunctionExecutor.Run(() =>
@@ -139,7 +140,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       });
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void RegisterUnloadEventsPopulatesRegistry()
     {
       // Regression test for Fix 1 in issue #1983: RegisterUnloadEvents must record the module's
@@ -168,7 +169,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       });
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void FlushHitFileClearedInsideMutexPreventsDoubleWrite()
     {
       // Regression test for Fix 3 in issue #1983: FlushHitFile must be cleared inside the mutex so a
@@ -194,7 +195,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       });
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void HitsFileWrittenAtomicallyLeavesNoTempFile()
     {
       // Regression test for Fix 2 in issue #1983: UnloadModule must write via a temp file and rename
@@ -215,7 +216,7 @@ namespace Coverlet.Core.Tests.Instrumentation
       });
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void MutexBlocksMultipleWriters()
     {
       FunctionExecutor.Run(async () =>
@@ -249,7 +250,7 @@ namespace Coverlet.Core.Tests.Instrumentation
 
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void LockFileHeldDuringWriteAndReleasedAfter()
     {
       FunctionExecutor.Run(() =>

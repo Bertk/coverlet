@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Coverlet.Core;
 using Coverlet.Core.CoverageSamples.Tests;
 using Coverlet.Core.Tests;
+using Coverlet.Core.Tests.Infrastructure;
 using Coverlet.Tests.Utils;
 using Xunit;
 
@@ -46,7 +47,7 @@ namespace Coverlet.CoreCoverage.Tests
       }
     }
 
-    [Fact]
+    [LinuxUnsupportedFact]
     public void AsyncAwait_Issue_730()
     {
       string path = Path.GetTempFileName();

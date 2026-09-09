@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Coverlet.Core;
 using Coverlet.Core.CoverageSamples.Tests;
 using Coverlet.Core.Tests;
+using Coverlet.Core.Tests.Infrastructure;
 using Coverlet.Tests.Utils;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace Coverlet.CoreCoverage.Tests
 {
   public partial class CoverageTests : ExternalProcessExecutionTest
   {
-    [Fact]
+    [LinuxUnsupportedFact]
     public void Yield_Single()
     {
       string path = Path.GetTempFileName();
