@@ -70,6 +70,7 @@ mockFileSystem.Setup(x => x.Exists("/fake/reports")).Returns(true);
 mockFileSystem.Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>()));
 // Verify the mock was called correctly
 mockFileSystem.Verify(x => x.WriteAllText(It.Is<string>(path => path.EndsWith("report.json")), It.IsAny<string>()), Times.Once);
+
 ### Moq Testing Rules (Critical - Prevents Runtime Errors)
 
 **NEVER use extension methods in Moq `Setup()` or `Verify()` calls.**
@@ -97,6 +98,7 @@ _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.IsAn
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("json")), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
 // Setup LogWarning behavior
 _mockLogger.Setup(x => x.Log(LogLevel.Warning, It.IsAny<string>()));
+
 #### Example: Mocking LogDebug
 
 ❌ **INCORRECT**:
@@ -109,6 +111,7 @@ _mockLogger.Verify(x => x.Log(LogLevel.Debug, It.IsAny<EventId>(), It.IsAny<It.I
 _mockLogger.Verify(x => x.Log(LogLevel.Debug, It.IsAny<EventId>(), It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("xml")), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
 // Setup LogError behavior
 _mockLogger.Setup(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()));
+
 **Key Points:**
 1. Always use `ILogger.Log()` with the appropriate `LogLevel` instead of extension methods.
 2. Use `It.IsAny<It.IsAnyType>()` for the state parameter.
@@ -148,8 +151,7 @@ This codebase uses **TWO different ILogger interfaces** with different signature
 // BAD - Microsoft.Testing.Platform.Logging.ILogger does NOT have EventId
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), // ⚠️ EventId does NOT exist in MTP LOGGER
      It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
-     ```
-
+     
 ✅ **CORRECT** - Uses actual MTP ILogger API signature (async methods):
 // GOOD - Microsoft.Testing.Platform.Logging.ILogger uses simple async methods
 _mockLogger.Verify(x => x.LogInformationAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -160,6 +162,7 @@ _mockLogger.Verify(x => x.LogInformationAsync(It.Is<string>(s => s.Contains("exp
 // For synchronous LoggerExtensions (extension methods):
 // NOTE: These are extension methods and cannot be verified with Moq; verify the underlying Log(...) call instead.
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.Is<string>(s => s.Contains("Coverage reports generated")), It.IsAny<Exception?>(), It.IsAny<Func<string, Exception?, string>>()), Times.Once);
+
 **Verification Checklist:**
 - [ ] I have searched for the interface definition using `get_symbols_by_name`.
 - [ ] I have reviewed existing usage in the codebase using `code_search`.
@@ -238,38 +241,9 @@ public void LogInformation(string message, bool important = false)
 6. **Verify existing tests** - Check for duplicates before adding new test methods.
 7. **Use Theory for parameterized tests** - Don't create multiple test methods for different input values.
 
-## Issue-Specific Guidelines
+## Testing with xUnit v3
 
-- For issue #1965, identify problematic assemblies before instrumentation and skip them, rather than relying on partial-restore/non-fatal restore behavior after failure.
-- For assembly-level instrumentation viability, preflight logic should only check lock and resolvability, not PDB/source-based exclusion; PDB/source exclusion remains handled by existing assembly-without-sources filtering via CanInstrument/options.
-- **Prefer calling `instrumenter.CanInstrument()` before preflight** so assemblies already excluded by existing coverage filters (no PDB/no local sources) skip preflight probing.
-
-## Documentation Guidelines for Issue Resolution
-
-### Documentation Limitation (Critical Rule)
-
-**When resolving issues, limit documentation to ONE comprehensive document ONLY.**
-
-**Validation Checklist Before Generating Tests:**
-- [ ] I have searched for existing tests using `code_search`.
-- [ ] I have reviewed existing test files in the same test project.
-- [ ] I have identified which existing tests cover similar scenarios.
-- [ ] I have documented which proposed tests are redundant.
-- [ ] I can justify why each new test adds unique value.
-- [ ] I have considered refactoring existing tests instead of adding duplicates.
-- [ ] I have verified the actual API signatures being tested.
-- [ ] I have used the correct mocking approach for the specific ILogger interface.
-- [ ] I have used mocked file system abstractions instead of real file I/O.
-
-## Summary of Key Testing Rules
-
-1. **Always use `IFileSystem` abstraction** - Never use `File`, `Directory`, or `Path` static methods directly in tests.
-2. **Always verify API signatures** - Use `get_symbols_by_name` and `code_search` before mocking external APIs.
-3. **Know your ILogger** - Microsoft.Testing.Platform.Logging.ILogger ≠ Microsoft.Extensions.Logging.ILogger.
-4. **Avoid extension methods in Moq** - They cannot be intercepted and will cause runtime exceptions.
-5. **Use simulated paths** - Always use fake paths like `/fake/path/test.dll` in test mocks.
-6. **Verify existing tests** - Check for duplicates before adding new test methods.
-7. **Use Theory for parameterized tests** - Don't create multiple test methods for different input values.
+For this repo's xUnit v3 Microsoft.Testing.Platform test apps, use xUnit-specific filters such as `--filter-method`, `--filter-class`, or `--filter-query`; VSTest-style `--filter` is unsupported.
 
 ## Issue-Specific Guidelines
 
@@ -374,6 +348,7 @@ The one comprehensive document MUST include:
 - Build status
 - Test status
 - Coverage metrics
+```
 
 #### Documentation Creation (Critical Rule - Always Ask First)
 

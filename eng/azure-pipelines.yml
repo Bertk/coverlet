@@ -56,7 +56,7 @@ jobs:
 - job: Legacy
   displayName:  Legacy Windows
   continueOnError: 'true'
-  timeoutInMinutes: 30
+  timeoutInMinutes: 40
   cancelTimeoutInMinutes: 5
   strategy:
     matrix:

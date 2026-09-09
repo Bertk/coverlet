@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Coverlet.Core.Tests.Infrastructure;
 
@@ -23,6 +24,8 @@ public static class TestEnvironment
     string.Equals(Environment.GetEnvironmentVariable("TF_BUILD"), "true", StringComparison.OrdinalIgnoreCase) ||
     // GitHub Actions - same as $(GITHUB_ACTIONS) in Directory.Build.props
     string.Equals(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"), "true", StringComparison.OrdinalIgnoreCase);
+
+  public static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
   /// <summary>
   /// Returns true if tests are running inside Visual Studio Test Explorer (interactively).
