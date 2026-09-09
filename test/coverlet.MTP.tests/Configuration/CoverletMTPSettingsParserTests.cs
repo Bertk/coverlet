@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Coverlet.Core.Enums;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
@@ -173,6 +174,25 @@ public class CoverletMTPSettingsParserTests
     Assert.Contains("[coverlet.*]*", settings.ExcludeFilters);
     Assert.Contains("[MyApp.Tests]*", settings.ExcludeFilters);
     Assert.Equal("[coverlet.*]*", settings.ExcludeFilters[0]); // Default is first
+  }
+
+  [Fact]
+  public void ParseThresholdSettingsReadsAllThresholdValues()
+  {
+    IConfiguration configuration = new ConfigurationBuilder()
+      .AddInMemoryCollection(new Dictionary<string, string?>
+      {
+        ["Coverlet:Threshold"] = "70",
+        ["Coverlet:ThresholdStat"] = "total",
+        ["Coverlet:ThresholdType"] = "line, branch,method"
+      })
+      .Build();
+
+    CoverletMTPSettings settings = CoverletMTPSettingsParser.Parse(configuration, "test.dll");
+
+    Assert.Equal(70, settings.Threshold);
+    Assert.Equal(ThresholdStatistic.Total, settings.ThresholdStat);
+    Assert.Equal(["line", "branch", "method"], settings.ThresholdType);
   }
 
   [Fact]

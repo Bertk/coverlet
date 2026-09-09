@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Coverlet.Core.Enums;
 using Coverlet.MTP.CommandLine;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Logging;
@@ -304,6 +305,44 @@ internal sealed class CoverageConfiguration
 
   public bool SkipAutoProps =>
     GetBoolOptionWithDefault(CoverletOptionNames.SkipAutoProps, _configFileSettings?.SkipAutoProps ?? false);
+
+  public int? GetThreshold()
+  {
+    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.Threshold, out string[]? values) &&
+    values.Length > 0 &&
+    int.TryParse(values[0], out int threshold) &&
+    threshold is >= 0 and <= 100)
+    {
+      return threshold;
+    }
+
+    return _configFileSettings?.Threshold is >= 0 and <= 100 ? _configFileSettings.Threshold : null;
+  }
+
+  public ThresholdStatistic GetThresholdStatistic()
+  {
+#if NETSTANDARD2_0
+#pragma warning disable CA2263 // Generic overload not available on netstandard2.0
+    return _commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.ThresholdStat, out string[]? values)
+        ? (ThresholdStatistic)Enum.Parse(typeof(ThresholdStatistic), values[0], ignoreCase: true)
+        : _configFileSettings?.ThresholdStat ?? CoverletMTPConstants.DefaultThresholdStat;
+#pragma warning restore CA2263
+#else
+    return _commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.ThresholdStat, out string[]? values)
+        ? Enum.Parse<ThresholdStatistic>(values[0], ignoreCase: true)
+        : _configFileSettings?.ThresholdStat ?? CoverletMTPConstants.DefaultThresholdStat;
+#endif
+  }
+
+  public List<string> GetThresholdTypes()
+  {
+    if (_commandLineOptions.TryGetOptionArgumentList(CoverletOptionNames.ThresholdType, out string[]? values))
+    {
+      return [.. values.SelectMany(value => value.Split(',')).Select(value => value.Trim())];
+    }
+
+    return _configFileSettings?.ThresholdType ?? [CoverletMTPConstants.DefaultThresholdType];
+  }
 
   public string[] GetDoesNotReturnAttributes()
   {

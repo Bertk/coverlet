@@ -139,13 +139,13 @@ public class CollectorExtensionTests
       _mockFileSystem.Object);  // Inject the mock file system
   }
 
-  private static async Task InvokeGenerateReportsAsync(CollectorExtension collector, CoverageResult coverageResult)
+  private static async Task InvokeGenerateReportsAsync(CollectorExtension collector, CoverageResult coverageResult, int testHostExitCode = 0)
   {
     System.Reflection.MethodInfo? method = typeof(CollectorExtension)
       .GetMethod("GenerateReportsAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
     Assert.NotNull(method);
 
-    await (Task)method.Invoke(collector, [coverageResult, CancellationToken.None])!;
+    await (Task)method.Invoke(collector, [coverageResult, testHostExitCode, CancellationToken.None])!;
   }
 
   private void ConfigureCollectorForGenerateReports(
@@ -673,7 +673,7 @@ public class CollectorExtensionTests
     _mockOutputDevice.Verify(x => x.DisplayAsync(
       It.IsAny<IOutputDeviceDataProducer>(),
       It.IsAny<IOutputDeviceData>(),
-      It.IsAny<CancellationToken>()), Times.AtLeast(3));
+      It.IsAny<CancellationToken>()), Times.AtLeast(2));
   }
 
   [Fact]

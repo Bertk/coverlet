@@ -30,6 +30,9 @@ internal static class CoverletCommandLineOptionDefinitions
       new CommandLineOption(CoverletOptionNames.SkipAutoProps, "Skip auto-implemented properties.", ArgumentArity.Zero, isHidden: false),
       new CommandLineOption(CoverletOptionNames.DoesNotReturnAttribute, "Attributes that mark methods as not returning.", ArgumentArity.ZeroOrMore, isHidden: false),
       new CommandLineOption(CoverletOptionNames.ExcludeAssembliesWithoutSources, "Exclude assemblies without source code.", ArgumentArity.ZeroOrOne, isHidden: false),
+      new CommandLineOption(CoverletOptionNames.Threshold, "Coverage threshold percentage.", ArgumentArity.ExactlyOne, isHidden: false),
+      new CommandLineOption(CoverletOptionNames.ThresholdType, "Type of coverage threshold (line, branch, method).", ArgumentArity.OneOrMore, isHidden: false),
+      new CommandLineOption(CoverletOptionNames.ThresholdStat, "Statistic for coverage threshold (total, average, minimum).", ArgumentArity.ExactlyOne, isHidden: false),
     ];
   }
 }

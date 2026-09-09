@@ -28,6 +28,7 @@ In addition to the rules enforced by `.editorconfig`, you SHOULD:
   - SA1316: Tuple element names should use correct casing
   - SA1518: File is required to end with a single newline character
 - Any update for pattern matching `or` must not break the already-correct `text == "hello" || text == "world"` operator scenario.
+- For multi-targeted projects including netstandard2.0, avoid APIs unavailable on netstandard2.0 such as `ArgumentNullException.ThrowIfNull`.
 
 ## Testing Guidelines
 
@@ -58,16 +59,10 @@ In addition to the rules enforced by `.editorconfig`, you SHOULD:
 **Examples:**
 
 ❌ **INCORRECT** - Direct file system usage:
-
-```cs
 // BAD - Creates real files and directories
 File.WriteAllText("report.json", content); Directory.CreateDirectory("reports");
 bool exists = File.Exists("test.dll");
-```
-
 ✅ **CORRECT** - Mock file system:
-
-```cs
 // GOOD - Uses mocked abstraction with simulated paths
 var mockFileSystem = new Mock<IFileSystem>();
 mockFileSystem.Setup(x => x.Exists("/fake/path/test.dll")).Returns(true);
@@ -75,7 +70,6 @@ mockFileSystem.Setup(x => x.Exists("/fake/reports")).Returns(true);
 mockFileSystem.Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>()));
 // Verify the mock was called correctly
 mockFileSystem.Verify(x => x.WriteAllText(It.Is<string>(path => path.EndsWith("report.json")), It.IsAny<string>()), Times.Once);
-```
 
 ### Moq Testing Rules (Critical - Prevents Runtime Errors)
 
@@ -93,44 +87,30 @@ Extension methods are static methods that cannot be intercepted by Moq. Using th
 #### Example: Mocking ILogger
 
 ❌ **INCORRECT** - Will throw `NotSupportedException`:
-
-```cs
 // This will FAIL at runtime
 _mockLogger.Verify(x => x.LogInformation(It.IsAny<string>()), Times.Once);
 _mockLogger.Verify(x => x.LogInformation(It.Is<string>(s => s.Contains("json"))), Times.Once);
 _mockLogger.Setup(x => x.LogWarning(It.IsAny<string>()));
-```
-
 ✅ **CORRECT** - Mocks the underlying `Log` method:
-
-```cs
 // Verify LogInformation was called once
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
 // Verify LogInformation was called with a message containing "json"
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("json")), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
 // Setup LogWarning behavior
 _mockLogger.Setup(x => x.Log(LogLevel.Warning, It.IsAny<string>()));
-```
 
 #### Example: Mocking LogDebug
 
 ❌ **INCORRECT**:
-
-```cs
 // This will FAIL at runtime
 _mockLogger.Verify(x => x.LogDebug(It.IsAny<string>()), Times.Once);
-```
-
 ✅ **CORRECT** - Mocks the underlying `Log` method:
-
-```cs
 // Verify LogDebug was called once
 _mockLogger.Verify(x => x.Log(LogLevel.Debug, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
 // Verify LogDebug was called with a message containing "xml"
 _mockLogger.Verify(x => x.Log(LogLevel.Debug, It.IsAny<EventId>(), It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("xml")), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
 // Setup LogError behavior
 _mockLogger.Setup(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()));
-```
 
 **Key Points:**
 1. Always use `ILogger.Log()` with the appropriate `LogLevel` instead of extension methods.
@@ -168,16 +148,11 @@ This codebase uses **TWO different ILogger interfaces** with different signature
 **Common Pitfall - Microsoft.Testing.Platform.Logging.ILogger:**
 
 ❌ **INCORRECT** - Assumes `EventId` parameter (which doesn't exist in MTP Logger):
-
-```cs
 // BAD - Microsoft.Testing.Platform.Logging.ILogger does NOT have EventId
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), // ⚠️ EventId does NOT exist in MTP LOGGER
      It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
-     ```
-
+     
 ✅ **CORRECT** - Uses actual MTP ILogger API signature (async methods):
-
-```cs
 // GOOD - Microsoft.Testing.Platform.Logging.ILogger uses simple async methods
 _mockLogger.Verify(x => x.LogInformationAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
 _mockLogger.Verify(x => x.LogErrorAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -187,7 +162,6 @@ _mockLogger.Verify(x => x.LogInformationAsync(It.Is<string>(s => s.Contains("exp
 // For synchronous LoggerExtensions (extension methods):
 // NOTE: These are extension methods and cannot be verified with Moq; verify the underlying Log(...) call instead.
 _mockLogger.Verify(x => x.Log(LogLevel.Information, It.Is<string>(s => s.Contains("Coverage reports generated")), It.IsAny<Exception?>(), It.IsAny<Func<string, Exception?, string>>()), Times.Once);
-```
 
 **Verification Checklist:**
 - [ ] I have searched for the interface definition using `get_symbols_by_name`.
@@ -208,8 +182,6 @@ When mocking interfaces, **reference actual adapter implementations** in the cod
 - `src/coverlet.core/Abstractions/ILogger.cs` - Coverlet's internal logger interface.
 
 **Example from CoverletLoggerAdapter.cs:**
-
-```csharp
 // Shows actual MTP ILogger usage - simple methods, no EventId
 public void LogInformation(string message, bool important = false)
 {
@@ -221,9 +193,7 @@ public void LogInformation(string message, bool important = false)
     {
         _logger.LogInformation(message);
     }
-}
-```
-### Test Generation Verification (Critical Rule)
+}### Test Generation Verification (Critical Rule)
 
 **Before generating any test, you MUST:**
 
@@ -270,6 +240,10 @@ public void LogInformation(string message, bool important = false)
 5. **Use simulated paths** - Always use fake paths like `/fake/path/test.dll` in test mocks.
 6. **Verify existing tests** - Check for duplicates before adding new test methods.
 7. **Use Theory for parameterized tests** - Don't create multiple test methods for different input values.
+
+## Testing with xUnit v3
+
+For this repo's xUnit v3 Microsoft.Testing.Platform test apps, use xUnit-specific filters such as `--filter-method`, `--filter-class`, or `--filter-query`; VSTest-style `--filter` is unsupported.
 
 ## Issue-Specific Guidelines
 
@@ -374,6 +348,7 @@ The one comprehensive document MUST include:
 - Build status
 - Test status
 - Coverage metrics
+```
 
 #### Documentation Creation (Critical Rule - Always Ask First)
 

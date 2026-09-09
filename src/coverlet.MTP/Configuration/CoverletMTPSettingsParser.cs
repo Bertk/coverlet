@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Coverlet.Core.Enums;
 using Microsoft.Extensions.Configuration;
 
 namespace Coverlet.MTP.Configuration;
@@ -45,6 +46,9 @@ internal class CoverletMTPSettingsParser
     settings.ExcludeAssembliesWithoutSources = section[CoverletMTPConstants.ExcludeAssembliesWithoutSourcesKey] ?? "MissingAll";
     settings.DisableManagedInstrumentationRestore = ParseBoolValue(section, CoverletMTPConstants.DisableManagedInstrumentationRestoreKey);
     settings.ReportFormats = ParseReportFormats(section);
+    settings.Threshold = ParseThreshold(section);
+    settings.ThresholdStat = ParseThresholdStat(section);
+    settings.ThresholdType = ParseThresholdType(section);
 
     return settings;
   }
@@ -62,6 +66,33 @@ internal class CoverletMTPSettingsParser
     return [CoverletMTPConstants.DefaultExcludeFilter, .. filters];
   }
 
+  private static List<string> ParseThresholdType(IConfigurationSection section)
+  {
+    List<string> types = [.. ParseArrayValue(section, CoverletMTPConstants.ThresholdTypeKey)
+       .Select(t => t.Trim().ToLowerInvariant())
+       .Where(t => t is "line" or "branch" or "method")];
+    return types.Count == 0 ? [CoverletMTPConstants.DefaultThresholdType] : types;
+  }
+
+  private static ThresholdStatistic ParseThresholdStat(IConfigurationSection section)
+  {
+    ThresholdStatistic type = CoverletMTPConstants.DefaultThresholdStat;
+
+    switch (section[CoverletMTPConstants.ThresholdStatKey]?.ToLowerInvariant())
+    {
+      case "minimum":
+        type = ThresholdStatistic.Minimum;
+        break;
+      case "average":
+        type = ThresholdStatistic.Average;
+        break;
+      case "total":
+        type = ThresholdStatistic.Total;
+        break;
+    }
+    return type;
+  }
+
   private static string[] ParseArrayValue(IConfigurationSection section, string key)
   {
     string? value = section[key];
@@ -72,6 +103,11 @@ internal class CoverletMTPSettingsParser
         .Select(v => v.Trim())
         .Where(v => !string.IsNullOrWhiteSpace(v))];
   }
+
+  private static int? ParseThreshold(IConfigurationSection section) =>
+         int.TryParse(section[CoverletMTPConstants.ThresholdKey], out int threshold) && threshold is >= 0 and <= 100
+       ? threshold
+       : null;
 
   private static bool ParseBoolValue(IConfigurationSection section, string key)
   {

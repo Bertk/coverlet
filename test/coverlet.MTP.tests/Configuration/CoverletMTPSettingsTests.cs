@@ -29,6 +29,7 @@ public class CoverletMTPSettingsTests
     Assert.False(settings.DeterministicReport);
     Assert.Equal("MissingAll", settings.ExcludeAssembliesWithoutSources);
     Assert.False(settings.DisableManagedInstrumentationRestore);
+    Assert.Null(settings.Threshold);
   }
 
   [Fact]
@@ -51,7 +52,10 @@ public class CoverletMTPSettingsTests
       SkipAutoProps = false,
       DoesNotReturnAttributes = ["DoesNotReturn"],
       DeterministicReport = true,
-      ExcludeAssembliesWithoutSources = "MissingAny"
+      ExcludeAssembliesWithoutSources = "MissingAny",
+      Threshold = 70,
+      ThresholdStat = Coverlet.Core.Enums.ThresholdStatistic.Total,
+      ThresholdType = ["line", "branch"]
     };
 
     // Act
@@ -62,5 +66,8 @@ public class CoverletMTPSettingsTests
     Assert.Contains("IncludeFilters: '[*]*'", result);
     Assert.Contains("UseSourceLink: 'True'", result);
     Assert.Contains("DeterministicReport: 'True'", result);
+    Assert.Contains("Threshold: '70'", result);
+    Assert.Contains("ThresholdStat: 'Total'", result);
+    Assert.Contains("ThresholdType: 'line,branch'", result);
   }
 }

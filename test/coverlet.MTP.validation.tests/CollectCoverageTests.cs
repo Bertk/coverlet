@@ -66,6 +66,27 @@ public class CollectCoverageTests : MtpValidationTestBase
   }
 
   [Fact]
+  public async Task CoverageThresholdFailure_UsesMtpManagedExitCode()
+  {
+    // Arrange
+    string testName = TestContext.Current.TestCase!.TestMethodName!;
+    using var testProject = CreateTestProject(testName, includeSimpleTest: true, includeMultipleClasses: true);
+    await BuildProject(testProject.SolutionPath);
+
+    // Act
+    var result = await RunTestsWithCoverage(
+      testProject,
+      "--coverlet --coverlet-output-format json --coverlet-threshold 100 --coverlet-threshold-type line --coverlet-threshold-stat total",
+      testName);
+
+    TestContext.Current?.AddAttachment("Test Output", result.CombinedOutput);
+
+    // Assert
+    Assert.True(result.ExitCode == 14, $"Expected threshold failure exit code 14 from Microsoft Testing Platform but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
+    Assert.Contains("coverage threshold was not met", result.CombinedOutput);
+  }
+
+  [Fact]
   public async Task CoverageWithFormat_GeneratesCorrectOutputFormat()
   {
     // Arrange
@@ -311,7 +332,7 @@ public class CollectCoverageTests : MtpValidationTestBase
   {
     // Arrange
     string testName = TestContext.Current.TestCase!.TestMethodName!;
-    using var testProject = CreateTestProject(testName, includeSimpleTest: true);
+    using var testProject = CreateTestProject(testName, includeSimpleTest: true, includeBranchTest: true);
     await BuildProject(testProject.SolutionPath);
 
     // Act
@@ -325,20 +346,21 @@ public class CollectCoverageTests : MtpValidationTestBase
     // Assert - test run succeeded
     Assert.True(result.ExitCode == 0, $"Expected successful test run (exit code 0) but got {result.ExitCode} -> '{result.ErrorText}'.\n\n{result.CombinedOutput}");
 
-    // Assert - module table header appears in output
-    Assert.True(result.StandardOutput.Contains("| Module"),
-      $"Expected coverage summary module table (| Module |) in standard output.\n\n{result.CombinedOutput}");
+    // Assert - MTP summary appears with module and aggregate rows
+    Assert.True(result.StandardOutput.Contains("Code Coverage Summary:"),
+      $"Expected code coverage summary in standard output.\n\n{result.CombinedOutput}");
 
-    // Assert - SUT module name appears in the table
-    Assert.True(result.StandardOutput.Contains("SampleLibrary"),
-      $"Expected SUT module 'SampleLibrary' in coverage summary table.\n\n{result.CombinedOutput}");
+    Assert.True(result.StandardOutput.Contains("SampleLibrary.dll - Branch:"),
+      $"Expected module branch coverage for SampleLibrary.dll in standard output.\n\n{result.CombinedOutput}");
 
-    // Assert - total/average summary table appears
-    Assert.True(result.StandardOutput.Contains("| Total"),
-      $"Expected '| Total' row in coverage summary table.\n\n{result.CombinedOutput}");
+    Assert.True(result.StandardOutput.Contains("Total - Branch:"),
+      $"Expected total branch coverage in standard output.\n\n{result.CombinedOutput}");
 
-    Assert.True(result.StandardOutput.Contains("| Average"),
-      $"Expected '| Average' row in coverage summary table.\n\n{result.CombinedOutput}");
+    Assert.False(result.StandardOutput.Contains("Total - Branch: N/A"),
+      $"Expected total branch coverage to be numeric, but it was N/A.\n\n{result.CombinedOutput}");
+
+    Assert.False(result.StandardOutput.Contains("SampleLibrary.dll - Branch: N/A"),
+      $"Expected module branch coverage to be numeric, but it was N/A.\n\n{result.CombinedOutput}");
   }
 
   [Fact]
@@ -1410,6 +1432,7 @@ public class StringHelperTests
       11 => "test process will exit if dependent process exits",
       12 => "test session was unable to run because the client does not support any of the supported protocol versions",
       13 => "exceeded number of maximum failed tests",
+      14 => "coverage threshold was not met",
       _ => "unrecognized exit code"
     };
 

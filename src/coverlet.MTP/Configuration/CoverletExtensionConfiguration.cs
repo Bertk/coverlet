@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Toni Solarin-Sodara
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Coverlet.Core.Enums;
+
 namespace Coverlet.MTP.Configuration;
 
 /// <summary>
@@ -17,6 +19,18 @@ internal class CoverletExtensionConfiguration
   /// Test module
   /// </summary>
   public string? TestModule { get; set; }
+  /// <summary>
+  ///  Threshold for coverage percentage. If the coverage is below this threshold, the build will fail.
+  /// </summary>
+  public int? Threshold { get; set; }
+
+  /// <summary>
+  /// define which coverage statistic (Average|Minimum|Total) to use for threshold comparison. If not specified, the default is Minimum. If the coverage is below this threshold, the build will fail.
+  /// </summary>
+  public ThresholdStatistic ThresholdStat { get; set; }
+
+  // Coverage type thresholds -  array of coverage types to apply the threshold to. If not specified, the default is line coverage. If the coverage is below this threshold, the build will fail.
+  public List<string> ThresholdType { get; set; } = ["line"];
 
   // Coverage parameters
   public string[]? IncludeFilters { get; set; }

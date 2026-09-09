@@ -87,6 +87,9 @@ dotnet exec <test-assembly.dll> --help
 | `--coverlet-skip-auto-props` | Skip auto-implemented properties. (default: `false`) |
 | `--coverlet-does-not-return-attribute <attribute>` | Attributes that mark methods as not returning. Can be specified multiple times. (default: `none`) |
 | `--coverlet-exclude-assemblies-without-sources <value>` | Exclude assemblies without source code. Values: `MissingAll`, `MissingAny`, `None`. (default: `None`) |
+| `--coverlet-threshold <threshold>` | Exits with error if the coverage % is below value |
+| `--coverlet-threshold-type <line\|branch\|method>` | Coverage type(s) to apply the threshold to. Can be specified multiple times or as a comma-separated list. (default: `line`) |
+| `--coverlet-threshold-stat <Average\|Minimum\|Total>` | Coverage statistic used to enforce the threshold value. (default: `Minimum`) |
 
 > [!TIP]
 > If you encounter instrumentation failures like "The process cannot access the file ... because it is being used by another process", try setting `--coverlet-exclude-assemblies-without-sources MissingAll` (or in a config file: `"ExcludeAssembliesWithoutSources": "MissingAll"`) to skip assemblies without sources and reduce access conflicts.
@@ -167,21 +170,21 @@ The `testconfig.json` format is the standard configuration file for Microsoft Te
 
 | Key | Type | Description |
 | :--- | :--- | :---------- |
-| `include` | string | Comma-separated include filters (e.g., `[MyApp.*]*`) |
-| `includeDirectory` | string | Comma-separated additional directories for sources |
-| `exclude` | string | Comma-separated exclude filters (e.g., `[*.Tests]*`) |
-| `excludeByFile` | string | Comma-separated glob patterns for source file exclusion |
-| `excludeByAttribute` | string | Comma-separated attributes to exclude |
-| `format` | string | Comma-separated output formats (default: `cobertura`) |
-| `useSourceLink` | bool | Enable SourceLink support |
-| `singleHit` | bool | Limit hits to one per location |
-| `includeTestAssembly` | bool | Include test assembly in coverage |
-| `skipAutoProps` | bool | Skip auto-implemented properties |
-| `doesNotReturnAttribute` | string | Comma-separated attributes marking non-returning methods |
-| `deterministicReport` | bool | Generate deterministic reports |
-| `excludeAssembliesWithoutSources` | string | Values: `MissingAll`, `MissingAny`, `None` |
-| `disableManagedInstrumentationRestore` | bool | Disable managed instrumentation restore |
-| `mergeWith` | string | Path to existing coverage file to merge with |
+| `Include` | string | Comma-separated include filters (e.g., `[MyApp.*]*`) |
+| `IncludeDirectory` | string | Comma-separated additional directories for sources |
+| `Exclude` | string | Comma-separated exclude filters (e.g., `[*.Tests]*`) |
+| `ExcludeByFile` | string | Comma-separated glob patterns for source file exclusion |
+| `ExcludeByAttribute` | string | Comma-separated attributes to exclude |
+| `Format` | string | Comma-separated output formats (default: `cobertura`) |
+| `UseSourceLink` | bool | Enable SourceLink support |
+| `SingleHit` | bool | Limit hits to one per location |
+| `IncludeTestAssembly` | bool | Include test assembly in coverage |
+| `SkipAutoProps` | bool | Skip auto-implemented properties |
+| `DoesNotReturnAttribute` | string | Comma-separated attributes marking non-returning methods |
+| `DeterministicReport` | bool | Generate deterministic reports |
+| `ExcludeAssembliesWithoutSources` | string | Values: `MissingAll`, `MissingAny`, `None` |
+| `DisableManagedInstrumentationRestore` | bool | Disable managed instrumentation restore |
+| `MergeWith` | string | Path to existing coverage file to merge with |
 
 > [!NOTE]
 > Keys in `testconfig.json` use **camelCase** (e.g., `excludeByAttribute`), following the Microsoft Testing Platform convention.
@@ -236,6 +239,9 @@ The legacy `coverlet.mtp.appsettings.json` format is still supported for backwar
 | `DoesNotReturnAttribute` | string | Comma-separated attributes marking non-returning methods |
 | `DeterministicReport` | bool | Generate deterministic reports |
 | `ExcludeAssembliesWithoutSources` | string | Values: `MissingAll`, `MissingAny`, `None` (default: `MissingAll`) |
+| `Threshold` | int | Exits with error if the code coverage [0..100%]  is below value |
+| `ThresholdType` | string | Comma-separated coverage type to apply the Threshold to. [default: `line`] |
+| `ThresholdStat` | string | Coverage statistic used to enforce the threshold value. Values: `Minimum`, `Average`, `Total`. (default: `Minimum`) |
 
 **Example `coverlet.mtp.appsettings.json`:**
 
