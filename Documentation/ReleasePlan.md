@@ -46,6 +46,51 @@ In the following example the benchmark repository refit (<https://github.com/rea
 
 6. Check for differences in the coverage reports.
 
+## Configure the `Sign Client Credentials` variable group
+
+The nightly pipeline reads its Azure Key Vault signing credentials from an Azure DevOps variable group with this exact name. Create the group in the `coverlet` Azure DevOps project and authorize only the nightly pipeline to use it.
+
+1. Install Azure CLI, then sign in to the Azure DevOps organization:
+
+    ```shell
+    az login
+    az extension add --name azure-devops --upgrade
+    az devops configure --defaults organization=https://dev.azure.com/<organization> project=coverlet
+    ```
+
+    Replace `<organization>` with the Azure DevOps organization name. The account must have permission to create variable groups in the project. The Azure DevOps CLI extension requires Azure CLI 2.30.0 or later.
+
+2. Create the group with the non-secret settings and a temporary value for the client secret:
+
+    ```shell
+    az pipelines variable-group create \
+      --name "Sign Client Credentials" \
+      --description "Azure Key Vault credentials used to sign nightly NuGet packages." \
+      --variables \
+        SignKeyVaultUrl=https://<key-vault-name>.vault.azure.net/ \
+        SignClientId=<service-principal-client-id> \
+        SignTenantId=<tenant-id> \
+        SignKeyVaultCertificate=<certificate-name> \
+        SignClientSecret=temporary-value \
+      --output table
+    ```
+
+    Replace the placeholders with the Key Vault URL, service principal application (client) ID, Microsoft Entra tenant ID, and certificate name. The service principal must have permission to sign with the certificate's key in the Key Vault. Record the group ID returned by this command for the next step.
+
+3. Set the client secret as a protected variable. The CLI prompts for the value so it does not need to be included in the command or shell history:
+
+    ```shell
+    az pipelines variable-group variable update \
+      --group-id <variable-group-id> \
+      --name SignClientSecret \
+      --secret true \
+      --prompt-value true
+    ```
+
+4. In Azure DevOps, open **Pipelines > Library > Sign Client Credentials > Pipeline permissions**. Authorize the Coverlet nightly pipeline specifically. Do not grant open access to all pipelines because the group contains a client secret.
+
+5. Confirm that the group contains `SignKeyVaultUrl`, `SignClientId`, `SignTenantId`, `SignKeyVaultCertificate`, and `SignClientSecret`. The last variable must be marked secret. These names must match the references in `eng/azure-pipelines-nightly.yml`.
+
 ## How to manually release packages to nuget.org
 
 This is the steps to release new packages to nuget.org

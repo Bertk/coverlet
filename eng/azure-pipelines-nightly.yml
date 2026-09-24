@@ -1,6 +1,9 @@
 pool:
   vmImage: 'windows-latest'
 
+variables:
+- group: Sign Client Credentials
+
 steps:
 - task: UseDotNet@2
   inputs:
@@ -21,6 +24,27 @@ steps:
 
 - script: dotnet pack -c Release /p:PublicRelease=false
   displayName: Create NuGet packages
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: custom
+    custom: tool
+    arguments: install --tool-path "$(Agent.TempDirectory)\sign" sign --version 0.9.1-beta.26431.1
+  displayName: Install Sign tool
+
+- pwsh: |
+    & "$(Agent.TempDirectory)\sign\sign.exe" code azure-key-vault `
+      "**/*.nupkg" `
+      --base-directory "$(Build.SourcesDirectory)\artifacts\package\release" `
+      --file-digest sha256 `
+      --description "Coverlet" `
+      --description-url "https://github.com/coverlet-coverage/coverlet" `
+      --azure-key-vault-url "$(SignKeyVaultUrl)" `
+      --azure-key-vault-client-id "$(SignClientId)" `
+      --azure-key-vault-tenant-id "$(SignTenantId)" `
+      --azure-key-vault-client-secret '$(SignClientSecret)' `
+      --azure-key-vault-certificate "$(SignKeyVaultCertificate)"
+  displayName: Sign NuGet packages
 
 - task: NuGetCommand@2
   inputs:
