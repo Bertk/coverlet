@@ -55,10 +55,10 @@ The nightly pipeline reads its Azure Key Vault signing credentials from an Azure
     ```shell
     az login
     az extension add --name azure-devops --upgrade
-    az devops configure --defaults organization=https://dev.azure.com/<organization> project=coverlet
+    az devops configure --defaults organization=https://dev.azure.com/tonerdo/ project=coverlet
     ```
 
-    Replace `<organization>` with the Azure DevOps organization name. The account must have permission to create variable groups in the project. The Azure DevOps CLI extension requires Azure CLI 2.30.0 or later.
+    The account must have permission to create variable groups in the project. The Azure DevOps CLI extension requires Azure CLI 2.30.0 or later.
 
 2. Create the group with the non-secret settings and a temporary value for the client secret:
 
@@ -95,7 +95,7 @@ The nightly pipeline reads its Azure Key Vault signing credentials from an Azure
 
 This is the steps to release new packages to nuget.org
 
-1. Update projects version files. There are two `version.json` files in the repo. `<roo>\version.json` and `<root>\src\legacy\version.json` (remove `-preview.{height}` and adjust version)
+1. Update projects version files. There are two `version.json` files in the repo. `<root>\version.json` and `<root>\src\legacy\version.json` (remove `-preview.{height}` and adjust version)
 
     Do a PR and merge to master.
 
