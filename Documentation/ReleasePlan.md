@@ -62,6 +62,10 @@ The nightly pipeline reads its Azure Key Vault signing credentials from an Azure
 
 2. Create the group with the non-secret settings and a temporary value for the client secret:
 
+> [!NOTE]
+> The variable group must be created with the Azure CLI because the Azure DevOps web portal does not allow creating a group with a secret variable. The secret variable must be set in a separate command.
+> This is a one time setup. The group can be reused for future releases.
+
     ```shell
     az pipelines variable-group create \
       --name "Sign Client Credentials" \
