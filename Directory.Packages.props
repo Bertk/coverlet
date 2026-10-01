@@ -11,7 +11,7 @@
     <MicrosoftBuildVersion>17.11.48</MicrosoftBuildVersion>
     <MicrosoftCodeAnalysisVersion>5.9.0</MicrosoftCodeAnalysisVersion>
     <!-- .NET 8.0 support -->
-    <NugetPackageVersion>7.6.0</NugetPackageVersion>
+    <NugetPackageVersion>7.9.0</NugetPackageVersion>
     <!-- Test Platform, .NET Test SDK and Object Model  -->
     <MicrosoftNETTestSdkVersion>18.10.1</MicrosoftNETTestSdkVersion>
     <XunitV3Version>4.0.1</XunitV3Version>
