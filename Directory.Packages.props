@@ -8,7 +8,7 @@
   </ItemGroup>
   <PropertyGroup>
     <!-- .NET 8.0 support -->
-    <MicrosoftBuildVersion>17.11.48</MicrosoftBuildVersion>
+    <MicrosoftBuildVersion>18.11.0</MicrosoftBuildVersion>
     <MicrosoftCodeAnalysisVersion>5.9.0</MicrosoftCodeAnalysisVersion>
     <!-- .NET 8.0 support -->
     <NugetPackageVersion>7.9.0</NugetPackageVersion>
@@ -18,7 +18,7 @@
     <XunitRunnerVisualstudioVersion>4.0.1</XunitRunnerVisualstudioVersion>
     <MicrosoftTestingPlatformVersion>2.5.1</MicrosoftTestingPlatformVersion>
     <MoqVersion>4.21.0</MoqVersion>
-    <MicrosoftNetRuntimeVersion>10.0.13</MicrosoftNetRuntimeVersion>
+    <MicrosoftNetRuntimeVersion>11.0.0-rc.2.26504.105</MicrosoftNetRuntimeVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
