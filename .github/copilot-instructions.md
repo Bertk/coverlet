@@ -9,6 +9,7 @@ This is a .NET based repository that contains the coverlet projects for code cov
 - Stop deep analysis once effort/usage for a topic reaches about 60%, and keep investigation focused and efficient.
 - Do not use `rg` (ripgrep) commands because it is not available in the user's environment; use available alternatives instead.
 - Before continuing broader analysis/searches, verify the result of the most recent code update first (e.g., compile check/result verification).
+- Use ILVerify as a local dotnet tool for future IL investigations.
 
 ## Code Standards
 
@@ -194,7 +195,8 @@ public void LogInformation(string message, bool important = false)
     {
         _logger.LogInformation(message);
     }
-}### Test Generation Verification (Critical Rule)
+}
+### Test Generation Verification (Critical Rule)
 
 **Before generating any test, you MUST:**
 

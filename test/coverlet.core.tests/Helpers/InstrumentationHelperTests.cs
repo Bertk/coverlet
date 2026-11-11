@@ -134,7 +134,6 @@ namespace Coverlet.Core.Tests.Helpers
 
     [Theory]
     [InlineData("[*]")]
-    [InlineData("[-]*")]
     [InlineData("*")]
     [InlineData("][")]
     [InlineData(null)]
@@ -230,6 +229,19 @@ namespace Coverlet.Core.Tests.Helpers
       IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, includeFilters, excludeFilters);
 
       Assert.Equal(["ModuleB.dll", "Module.B.Tests.dll"], result);
+    }
+
+    [Fact]
+    public void TestSelectModulesWithGeneratedHyphenatedAssemblyFilterExcludesExactModule()
+    {
+      string generatedFilter = ProcessAssemblyHelper.ToExactExcludeFilter("MSS.Tools.xUnit-Runner");
+
+      Assert.True(_instrumentationHelper.IsValidFilterExpression(generatedFilter));
+
+      string[] modules = new[] { "MSS.Tools.Markdown.dll", "MSS.Tools.xUnit-Runner.dll" };
+      IEnumerable<string> result = _instrumentationHelper.SelectModules(modules, Array.Empty<string>(), new[] { generatedFilter });
+
+      Assert.Equal(["MSS.Tools.Markdown.dll"], result);
     }
 
     [Fact]
